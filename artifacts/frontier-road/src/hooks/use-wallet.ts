@@ -1,11 +1,18 @@
-import { useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, createElement } from 'react';
 
-// A mock wallet hook for the demo until actual Solana adapter is integrated
-export function useWallet() {
+interface WalletState {
+  isConnected: boolean;
+  walletAddress: string | null;
+  connect: () => void;
+  disconnect: () => void;
+}
+
+const WalletContext = createContext<WalletState | null>(null);
+
+export function WalletProvider({ children }: { children: ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
-  // Load from local storage to persist fake session
   useEffect(() => {
     const saved = localStorage.getItem('frontier_wallet');
     if (saved) {
@@ -15,7 +22,6 @@ export function useWallet() {
   }, []);
 
   const connect = () => {
-    // Generate a fake solana-like address
     const fakeAddress = 'Demo' + Math.random().toString(36).substring(2, 10) + 'xyz';
     setIsConnected(true);
     setWalletAddress(fakeAddress);
@@ -28,5 +34,17 @@ export function useWallet() {
     localStorage.removeItem('frontier_wallet');
   };
 
-  return { isConnected, walletAddress, connect, disconnect };
+  return createElement(
+    WalletContext.Provider,
+    { value: { isConnected, walletAddress, connect, disconnect } },
+    children
+  );
+}
+
+export function useWallet(): WalletState {
+  const ctx = useContext(WalletContext);
+  if (!ctx) {
+    throw new Error('useWallet must be used within a WalletProvider');
+  }
+  return ctx;
 }

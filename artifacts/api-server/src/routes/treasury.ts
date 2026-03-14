@@ -40,7 +40,7 @@ router.get("/treasury", async (req, res) => {
   const totalPaidOut = Number(paidResult?.total ?? 0);
 
   res.json({
-    totalBalance: totalDeposits + pendingEscrow,
+    totalBalance: totalDeposits - totalPaidOut,
     pendingEscrow,
     totalPaidOut,
     activeBounties: activeBounties[0]?.count ?? 0,
