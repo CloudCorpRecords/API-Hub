@@ -1,8 +1,10 @@
-# Workspace
+# Frontier Road — Community OS + Bounty Platform
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+**Frontier Road** is a full-stack web application that serves as the operating system for a co-living/hacker space community with an integrated bounty marketplace. Residents can post tasks with Solana USDC rewards, claim and complete bounties, coordinate resources, match skills, and chat with an AI concierge ("Tower").
+
+The architecture is API-first — all functionality is exposed via REST endpoints at `/api`, ready for mobile app integration.
 
 ## Stack
 
@@ -10,87 +12,92 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
+- **Frontend**: React + Vite + Tailwind CSS (dark cyberpunk theme)
 - **API framework**: Express 5
 - **Database**: PostgreSQL + Drizzle ORM
+- **AI**: OpenAI via Replit AI Integrations (gpt-5.2 for chat)
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+- **Routing**: wouter (frontend), Express Router (backend)
 
 ## Structure
 
 ```text
 artifacts-monorepo/
-├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
-├── lib/                    # Shared libraries
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
-│   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
-│   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts (single workspace package)
-│   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
-├── pnpm-workspace.yaml     # pnpm workspace (artifacts/*, lib/*, lib/integrations/*, scripts)
-├── tsconfig.base.json      # Shared TS options (composite, bundler resolution, es2022)
-├── tsconfig.json           # Root TS project references
-└── package.json            # Root package with hoisted devDeps
+├── artifacts/
+│   ├── api-server/            # Express API server (all backend routes)
+│   ├── frontier-road/         # React + Vite frontend (Frontier Road web app)
+│   └── mockup-sandbox/        # Design preview sandbox
+├── lib/
+│   ├── api-spec/              # OpenAPI spec + Orval codegen config
+│   ├── api-client-react/      # Generated React Query hooks
+│   ├── api-zod/               # Generated Zod schemas from OpenAPI
+│   ├── db/                    # Drizzle ORM schema + DB connection
+│   ├── integrations-openai-ai-server/  # OpenAI server SDK
+│   └── integrations-openai-ai-react/   # OpenAI React hooks
+├── scripts/                   # Utility scripts (seed, etc.)
+├── pnpm-workspace.yaml
+├── tsconfig.base.json
+├── tsconfig.json
+└── package.json
 ```
 
-## TypeScript & Composite Projects
+## Database Schema
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references. This means:
+- **bounties** — Task/bounty listings with title, description, reward (USDC), status (open/claimed/completed/cancelled), creator/claimer wallets, proof of work
+- **residents** — Community member profiles with name, wallet, skills (jsonb), floor, status (online/offline/busy), bio, stats
+- **transactions** — Treasury ledger (escrow_lock, escrow_release, payout, deposit, refund) with amounts, wallets, bounty references
+- **conversations** — AI chat conversations
+- **messages** — Chat messages (user/assistant roles)
 
-- **Always typecheck from the root** — run `pnpm run typecheck` (which runs `tsc --build --emitDeclarationOnly`). This builds the full dependency graph so that cross-package imports resolve correctly. Running `tsc` inside a single package will fail if its dependencies haven't been built yet.
-- **`emitDeclarationOnly`** — we only emit `.d.ts` files during typecheck; actual JS bundling is handled by esbuild/tsx/vite...etc, not `tsc`.
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in its `references` array. `tsc --build` uses this to determine build order and skip up-to-date packages.
+## API Endpoints
 
-## Root Scripts
+### Bounties
+- `GET /api/bounties` — List all bounties (filter by status)
+- `POST /api/bounties` — Create a new bounty
+- `GET /api/bounties/:id` — Get bounty details
+- `POST /api/bounties/:id/claim` — Claim a bounty
+- `POST /api/bounties/:id/complete` — Submit proof and complete
+- `POST /api/bounties/:id/cancel` — Cancel and refund escrow
 
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
+### Residents
+- `GET /api/residents` — List residents (filter by skill)
+- `POST /api/residents` — Register a new resident
+- `GET /api/residents/:id` — Get resident details
+- `PATCH /api/residents/:id` — Update resident info
 
-## Packages
+### Treasury
+- `GET /api/treasury` — Get treasury overview (balances, escrow, stats)
+- `GET /api/treasury/transactions` — List recent transactions
 
-### `artifacts/api-server` (`@workspace/api-server`)
+### AI Concierge (OpenAI)
+- `GET /api/openai/conversations` — List conversations
+- `POST /api/openai/conversations` — Create conversation
+- `GET /api/openai/conversations/:id` — Get conversation with messages
+- `DELETE /api/openai/conversations/:id` — Delete conversation
+- `GET /api/openai/conversations/:id/messages` — List messages
+- `POST /api/openai/conversations/:id/messages` — Send message (SSE stream)
 
-Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` for request and response validation and `@workspace/db` for persistence.
+## Frontend Pages
 
-- Entry: `src/index.ts` — reads `PORT`, starts Express
-- App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
-- Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
+- **Dashboard** (`/`) — System overview with live stats, recent bounties, activity log
+- **Bounty Board** (`/bounties`) — Filterable bounty list with create/claim/complete flows
+- **Resident Hub** (`/residents`) — Resident grid with skill tags and search
+- **Treasury** (`/treasury`) — Financial overview with transaction ledger
+- **AI Concierge** (`/chat`) — Chat with Tower AI assistant
 
-### `lib/db` (`@workspace/db`)
+## Development
 
-Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.
+- `pnpm --filter @workspace/api-server run dev` — Start API server
+- `pnpm --filter @workspace/frontier-road run dev` — Start frontend
+- `pnpm --filter @workspace/api-spec run codegen` — Regenerate API hooks/schemas
+- `pnpm --filter @workspace/db run push` — Push DB schema changes
+- `pnpm --filter @workspace/scripts run seed` — Seed sample data
 
-- `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
-- `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
-- `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
-- Exports: `.` (pool, db, schema), `./schema` (schema only)
+## Environment Variables
 
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
-
-### `lib/api-spec` (`@workspace/api-spec`)
-
-Owns the OpenAPI 3.1 spec (`openapi.yaml`) and the Orval config (`orval.config.ts`). Running codegen produces output into two sibling packages:
-
-1. `lib/api-client-react/src/generated/` — React Query hooks + fetch client
-2. `lib/api-zod/src/generated/` — Zod schemas
-
-Run codegen: `pnpm --filter @workspace/api-spec run codegen`
-
-### `lib/api-zod` (`@workspace/api-zod`)
-
-Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used by `api-server` for response validation.
-
-### `lib/api-client-react` (`@workspace/api-client-react`)
-
-Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
-
-### `scripts` (`@workspace/scripts`)
-
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+- `DATABASE_URL` — PostgreSQL connection string (auto-provisioned)
+- `AI_INTEGRATIONS_OPENAI_BASE_URL` — OpenAI proxy URL (auto-provisioned)
+- `AI_INTEGRATIONS_OPENAI_API_KEY` — OpenAI API key (auto-provisioned)
+- `PORT` — API server port (auto-assigned)

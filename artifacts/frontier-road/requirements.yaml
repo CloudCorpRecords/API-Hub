@@ -1,0 +1,19 @@
+packages:
+  "framer-motion": "For cyberpunk glitch and layout animations"
+  "recharts": "For treasury data visualization"
+  "date-fns": "For formatting bounty and transaction dates"
+  "clsx": "Utility for constructing className strings"
+  "tailwind-merge": "Utility for merging tailwind classes"
+
+images:
+  - path: "artifacts/frontier-road/public/images/cyber-bg.png"
+    description: "Dark cyberpunk abstract background with faint glowing neon cyan and magenta circuit board traces and grid lines on pitch black"
+    aspect_ratio: "16:9"
+  - path: "artifacts/frontier-road/public/images/avatar-placeholder.png"
+    description: "Stylized cyberpunk anonymous avatar, glowing neon outline, dark background"
+    aspect_ratio: "1:1"
+
+notes:
+  - Using generated Orval hooks from @workspace/api-client-react
+  - Chat SSE handled via custom fetch hook
+  - Simulating Solana wallet connection for demo purposes

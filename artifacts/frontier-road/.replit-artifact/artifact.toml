@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Frontier Road"
+version = "1.0.0"
+id = "artifacts/frontier-road"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 26038
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/frontier-road run dev"
+
+[services.env]
+PORT = "26038"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/frontier-road", "run", "build"]
+publicDir = "artifacts/frontier-road/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
