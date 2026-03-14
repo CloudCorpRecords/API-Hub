@@ -365,26 +365,3 @@ export const SendOpenaiMessageParams = zod.object({
 export const SendOpenaiMessageBody = zod.object({
   content: zod.string(),
 });
-
-/**
- * @summary Send audio and receive a streaming voice response
- */
-export const SendOpenaiVoiceMessageParams = zod.object({
-  id: zod.coerce.number(),
-});
-
-export const SendOpenaiVoiceMessageBody = zod.object({
-  audio: zod.string().describe("Base64-encoded audio data"),
-});
-
-/**
- * @summary Generate an image from a text prompt
- */
-export const GenerateOpenaiImageBody = zod.object({
-  prompt: zod.string(),
-  size: zod.enum(["1024x1024", "512x512", "256x256"]).optional(),
-});
-
-export const GenerateOpenaiImageResponse = zod.object({
-  b64_json: zod.string(),
-});

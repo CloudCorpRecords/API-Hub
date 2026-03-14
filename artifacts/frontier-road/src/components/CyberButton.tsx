@@ -1,11 +1,15 @@
-import { ReactNode, ButtonHTMLAttributes } from 'react';
+import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
-interface CyberButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface CyberButtonProps {
   children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'accent';
   isLoading?: boolean;
+  className?: string;
+  disabled?: boolean;
+  onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset';
 }
 
 export function CyberButton({ 
@@ -14,12 +18,14 @@ export function CyberButton({
   className, 
   isLoading,
   disabled,
-  ...props 
+  onClick,
+  type,
 }: CyberButtonProps) {
   
   const variants = {
     primary: "bg-primary/10 border-primary text-primary hover:bg-primary/20 cyber-glow-hover",
     secondary: "bg-secondary/10 border-secondary text-secondary hover:bg-secondary/20 cyber-glow-accent",
+    accent: "bg-accent/20 text-accent border-accent hover:bg-accent/30",
     danger: "bg-destructive/10 border-destructive text-destructive hover:bg-destructive/20 shadow-[0_0_15px_rgba(255,0,0,0.2)] hover:shadow-[0_0_25px_rgba(255,0,0,0.4)]",
     ghost: "border-transparent text-muted-foreground hover:text-primary hover:bg-primary/5"
   };
@@ -34,7 +40,8 @@ export function CyberButton({
         className
       )}
       disabled={disabled || isLoading}
-      {...props}
+      onClick={onClick}
+      type={type}
     >
       <div className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-20 bg-gradient-to-r from-transparent via-white to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
       

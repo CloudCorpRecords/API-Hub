@@ -50,7 +50,10 @@ export default function Bounties() {
   };
 
   const handleClaim = async (id: number) => {
-    if (!isConnected || !walletAddress) return toast({ title: "ACCESS DENIED", variant: "destructive" });
+    if (!isConnected || !walletAddress) {
+      toast({ title: "ACCESS DENIED", variant: "destructive" });
+      return;
+    }
     try {
       await claimMutation.mutateAsync({ id, data: { claimerWallet: walletAddress } });
       toast({ title: "CLAIMED", description: "Bounty assigned to you." });
@@ -226,7 +229,7 @@ export default function Bounties() {
                 {activeTab === 'claimed' && bounty.claimerWallet === walletAddress && (
                   <CyberButton 
                     variant="accent" 
-                    className="w-full text-xs py-1.5 bg-accent/20 text-accent border-accent hover:bg-accent/30"
+                    className="w-full text-xs py-1.5"
                     onClick={() => handleComplete(bounty.id)}
                     isLoading={completeMutation.isPending}
                   >
