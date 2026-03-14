@@ -10,7 +10,7 @@ import {
   getGetBountyQueryKey,
 } from "@workspace/api-client-react";
 
-export function useBounties(status?: any) {
+export function useBounties(status?: "open" | "claimed" | "completed" | "cancelled") {
   return useListBounties(status ? { status } : undefined);
 }
 

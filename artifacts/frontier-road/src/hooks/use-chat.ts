@@ -77,7 +77,7 @@ export function useChatStream(conversationId?: number) {
       const res = await fetch(`/api/openai/conversations/${conversationId}/messages`);
       if (res.ok) {
         const data = await res.json();
-        setMessages(data.map((m: any) => ({ role: m.role, content: m.content })));
+        setMessages(data.map((m: { role: string; content: string }) => ({ role: m.role as 'user' | 'assistant', content: m.content })));
       }
     } catch (e) {
       console.error("Failed to load history", e);
