@@ -154,6 +154,10 @@ router.post("/bounties/:id/cancel", async (req, res) => {
     res.status(404).json({ error: "Bounty not found" });
     return;
   }
+  if (bounty.status === "completed" || bounty.status === "cancelled") {
+    res.status(409).json({ error: `Cannot cancel a bounty that is already ${bounty.status}` });
+    return;
+  }
 
   const [updated] = await db
     .update(bountiesTable)
