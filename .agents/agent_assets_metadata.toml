@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "4mF5OdHrDAs-tneKPygbs"
+uri = "file://FRONTIER_ROAD_GUIDE.md"
+type = "text"
+title = "Frontier Road — How It Works"
