@@ -50,7 +50,7 @@ artifacts-monorepo/
 - **users** — Auth user profiles (id, email, firstName, lastName, profileImageUrl)
 - **bounties** — Task/bounty listings with title, description, reward (USDC), status (open/claimed/completed/cancelled), creator/claimer wallets, proof of work
 - **residents** — Community member profiles with name, wallet, skills (jsonb), floor, status (online/offline/busy), bio, stats
-- **transactions** — Treasury ledger (escrow_lock, escrow_release, payout, deposit, refund) with amounts, wallets, bounty references
+- **transactions** — Treasury ledger (escrow_lock, escrow_release, payout, deposit, refund, bounty_claim) with amounts, wallets, bounty references
 - **conversations** — AI chat conversations
 - **messages** — Chat messages (user/assistant roles)
 

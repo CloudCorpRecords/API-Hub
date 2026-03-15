@@ -5,7 +5,7 @@ import { bountiesTable } from "./bounties";
 
 export const transactionsTable = pgTable("transactions", {
   id: serial("id").primaryKey(),
-  type: text("type", { enum: ["escrow_lock", "escrow_release", "payout", "deposit", "refund"] }).notNull(),
+  type: text("type", { enum: ["escrow_lock", "escrow_release", "payout", "deposit", "refund", "bounty_claim"] }).notNull(),
   amount: numeric("amount", { precision: 18, scale: 6 }).notNull(),
   token: text("token").notNull().default("USDC"),
   fromWallet: text("from_wallet"),

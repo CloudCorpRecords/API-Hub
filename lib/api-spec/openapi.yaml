@@ -840,7 +840,7 @@ components:
           type: integer
         type:
           type: string
-          enum: [escrow_lock, escrow_release, payout, deposit, refund]
+          enum: [escrow_lock, escrow_release, payout, deposit, refund, bounty_claim]
         amount:
           type: number
         token:
