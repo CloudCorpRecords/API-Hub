@@ -32,12 +32,14 @@ export function useChatStream(conversationId?: number) {
       const decoder = new TextDecoder();
       if (!reader) return;
 
+      let sseBuffer = "";
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n\n');
+        sseBuffer += decoder.decode(value, { stream: true });
+        const lines = sseBuffer.split('\n\n');
+        sseBuffer = lines.pop() || "";
         
         for (const line of lines) {
           if (line.startsWith('data: ')) {
