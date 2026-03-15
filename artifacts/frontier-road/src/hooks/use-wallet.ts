@@ -15,7 +15,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated } = useAuth();
 
   const authWallet = isAuthenticated && user
-    ? `user_${user.id}`
+    ? user.id
     : null;
 
   const walletAddress = authWallet ?? manualAddress;

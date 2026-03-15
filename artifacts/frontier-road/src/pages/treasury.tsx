@@ -7,7 +7,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
 
 export default function Treasury() {
   const { data: overview, isLoading: overviewLoading } = useTreasuryOverview();
-  const { data: transactions, isLoading: txLoading } = useTransactions();
+  const { data: transactions, isLoading: txLoading } = useTransactions(100);
 
   const getIconForType = (type: string) => {
     switch(type) {
