@@ -20,4 +20,5 @@ export interface Resident {
   bountiesCreated: number;
   totalEarned: number;
   createdAt: Date;
+  userId?: string | null;
 }

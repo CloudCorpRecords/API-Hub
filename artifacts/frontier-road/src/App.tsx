@@ -11,6 +11,7 @@ import Bounties from "@/pages/bounties";
 import Residents from "@/pages/residents";
 import Treasury from "@/pages/treasury";
 import Chat from "@/pages/chat";
+import Profile from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -34,6 +35,7 @@ function Router() {
             <Route path="/residents" component={Residents} />
             <Route path="/treasury" component={Treasury} />
             <Route path="/chat" component={Chat} />
+            <Route path="/profile" component={Profile} />
             <Route component={NotFound} />
           </Switch>
         </Layout>

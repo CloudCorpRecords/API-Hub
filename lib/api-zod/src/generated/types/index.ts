@@ -26,6 +26,7 @@ export * from "./listBountiesStatus";
 export * from "./listResidentsParams";
 export * from "./listTransactionsParams";
 export * from "./logoutSuccess";
+export * from "./meResponse";
 export * from "./mobileTokenExchangeRequest";
 export * from "./mobileTokenExchangeSuccess";
 export * from "./openaiConversation";

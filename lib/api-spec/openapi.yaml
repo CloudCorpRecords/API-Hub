@@ -301,6 +301,93 @@ paths:
               schema:
                 $ref: "#/components/schemas/Bounty"
 
+  /me:
+    get:
+      operationId: getMyProfile
+      tags: [residents]
+      summary: Get the authenticated user's merged profile
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        "200":
+          description: Merged auth user and resident profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    patch:
+      operationId: updateMyProfile
+      tags: [residents]
+      summary: Update the authenticated user's resident profile
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateResidentBody"
+      responses:
+        "200":
+          description: Updated resident profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resident"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /me/link-resident/{residentId}:
+    post:
+      operationId: linkResident
+      tags: [residents]
+      summary: Claim an unlinked resident profile
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+        - name: residentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Linked resident
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resident"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resident not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Already linked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
   /residents:
     get:
       operationId: listResidents
@@ -761,6 +848,9 @@ components:
         createdAt:
           type: string
           format: date-time
+        userId:
+          type: string
+          nullable: true
       required:
         - id
         - name
@@ -949,3 +1039,16 @@ components:
           type: string
       required:
         - error
+
+    MeResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/AuthUser"
+        resident:
+          oneOf:
+            - $ref: "#/components/schemas/Resident"
+            - type: "null"
+      required:
+        - user
+        - resident

@@ -4,7 +4,9 @@ import { CyberButton } from '@/components/CyberButton';
 import { useBounties } from '@/hooks/use-bounties';
 import { useTreasuryOverview, useTransactions } from '@/hooks/use-treasury';
 import { useResidents } from '@/hooks/use-residents';
-import { Activity, Crosshair, Users, Wallet, AlertTriangle, Building2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useMe } from '@/hooks/use-profile';
+import { useAuth } from '@workspace/replit-auth-web';
+import { Activity, Crosshair, Users, Wallet, AlertTriangle, Building2, CheckCircle2, AlertCircle, UserCircle } from 'lucide-react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -35,6 +37,12 @@ export default function Dashboard() {
   const { data: residents, isLoading: residentsLoading } = useResidents();
   const { data: transactions } = useTransactions(8);
   const [showReportModal, setShowReportModal] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const { data: me } = useMe();
+
+  const profileIncomplete = isAuthenticated && me?.resident && (
+    !me.resident.skills || me.resident.skills.length === 0 || !me.resident.bio
+  );
 
   const activeBounties = bounties?.length || 0;
   const onlineResidents = residents?.filter(r => r.status === 'online').length || 0;
@@ -76,6 +84,25 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 pb-12">
       {showReportModal && <ReportIssueModal onClose={() => setShowReportModal(false)} />}
+
+      {profileIncomplete && (
+        <Link href="/profile">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-primary/10 border border-primary/30 p-4 flex items-center gap-3 cursor-pointer hover:bg-primary/15 transition-colors"
+          >
+            <UserCircle className="w-5 h-5 text-primary shrink-0" />
+            <div className="flex-1">
+              <span className="text-sm font-display tracking-widest text-primary uppercase">COMPLETE YOUR PROFILE</span>
+              <p className="text-xs text-muted-foreground font-sans mt-0.5">
+                Add your skills and bio to be discoverable by other residents.
+              </p>
+            </div>
+            <span className="text-xs text-primary font-display tracking-widest">GO &rarr;</span>
+          </motion.div>
+        </Link>
+      )}
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border/50 pb-6">
         <div>

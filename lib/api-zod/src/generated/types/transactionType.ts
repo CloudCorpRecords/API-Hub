@@ -15,4 +15,5 @@ export const TransactionType = {
   payout: "payout",
   deposit: "deposit",
   refund: "refund",
+  bounty_claim: "bounty_claim",
 } as const;

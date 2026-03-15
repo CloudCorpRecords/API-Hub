@@ -27,6 +27,7 @@ router.get("/residents", async (req, res) => {
     filtered.map((r) => ({
       ...r,
       totalEarned: Number(r.totalEarned),
+      userId: r.userId || null,
     }))
   );
 });
@@ -50,7 +51,7 @@ router.post("/residents", async (req, res) => {
     })
     .returning();
 
-  res.status(201).json({ ...resident, totalEarned: Number(resident.totalEarned) });
+  res.status(201).json({ ...resident, totalEarned: Number(resident.totalEarned), userId: resident.userId || null });
 });
 
 router.get("/residents/:id", async (req, res) => {
@@ -63,7 +64,7 @@ router.get("/residents/:id", async (req, res) => {
     res.status(404).json({ error: "Resident not found" });
     return;
   }
-  res.json({ ...resident, totalEarned: Number(resident.totalEarned) });
+  res.json({ ...resident, totalEarned: Number(resident.totalEarned), userId: resident.userId || null });
 });
 
 router.patch("/residents/:id", async (req, res) => {
@@ -72,6 +73,27 @@ router.patch("/residents/:id", async (req, res) => {
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
+  }
+
+  const [existing] = await db
+    .select()
+    .from(residentsTable)
+    .where(eq(residentsTable.id, id));
+
+  if (!existing) {
+    res.status(404).json({ error: "Resident not found" });
+    return;
+  }
+
+  if (existing.userId) {
+    if (!req.isAuthenticated()) {
+      res.status(401).json({ error: "Authentication required to update a linked profile" });
+      return;
+    }
+    if (existing.userId !== req.user.id) {
+      res.status(403).json({ error: "You can only update your own profile" });
+      return;
+    }
   }
 
   const updateData: Record<string, unknown> = {};
@@ -94,7 +116,7 @@ router.patch("/residents/:id", async (req, res) => {
     return;
   }
 
-  res.json({ ...updated, totalEarned: Number(updated.totalEarned) });
+  res.json({ ...updated, totalEarned: Number(updated.totalEarned), userId: updated.userId || null });
 });
 
 export default router;

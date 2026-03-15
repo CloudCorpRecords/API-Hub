@@ -78,7 +78,7 @@ export function Layout({ children }: { children: ReactNode }) {
         {/* User identity in sidebar */}
         <div className="p-4 border-t border-border space-y-3">
           {!isLoading && isAuthenticated && user && (
-            <div className="flex items-center gap-2 group">
+            <Link href="/profile" className="flex items-center gap-2 group cursor-pointer hover:bg-primary/5 -mx-1 px-1 py-1 transition-colors">
               {user.profileImageUrl ? (
                 <img
                   src={user.profileImageUrl}
@@ -97,13 +97,13 @@ export function Layout({ children }: { children: ReactNode }) {
                 <p className="text-[10px] text-muted-foreground">RESIDENT</p>
               </div>
               <button
-                onClick={logout}
+                onClick={(e) => { e.preventDefault(); logout(); }}
                 title="Log out"
                 className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
               >
                 <LogOut className="w-3.5 h-3.5" />
               </button>
-            </div>
+            </Link>
           )}
           {!isLoading && !isAuthenticated && (
             <button

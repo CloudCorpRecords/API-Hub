@@ -245,6 +245,110 @@ export const CancelBountyResponse = zod.object({
 });
 
 /**
+ * @summary Get the authenticated user's merged profile
+ */
+export const GetMyProfileHeader = zod.object({
+  Authorization: zod
+    .string()
+    .optional()
+    .describe("Opaque session token — `Bearer <sid>`."),
+});
+
+export const GetMyProfileResponse = zod.object({
+  user: zod.object({
+    id: zod.string(),
+    email: zod.string().email().nullable(),
+    firstName: zod.string().nullable(),
+    lastName: zod.string().nullable(),
+    profileImageUrl: zod.string().nullable(),
+  }),
+  resident: zod.union([
+    zod.object({
+      id: zod.number(),
+      name: zod.string(),
+      walletAddress: zod.string().nullish(),
+      avatar: zod.string().nullish(),
+      skills: zod.array(zod.string()),
+      floor: zod.number().nullish(),
+      status: zod.enum(["online", "offline", "busy"]),
+      bio: zod.string().nullish(),
+      bountiesCompleted: zod.number(),
+      bountiesCreated: zod.number(),
+      totalEarned: zod.number(),
+      createdAt: zod.date(),
+      userId: zod.string().nullish(),
+    }),
+    zod.null(),
+  ]),
+});
+
+/**
+ * @summary Update the authenticated user's resident profile
+ */
+export const UpdateMyProfileHeader = zod.object({
+  Authorization: zod
+    .string()
+    .optional()
+    .describe("Opaque session token — `Bearer <sid>`."),
+});
+
+export const UpdateMyProfileBody = zod.object({
+  name: zod.string().optional(),
+  walletAddress: zod.string().optional(),
+  avatar: zod.string().optional(),
+  skills: zod.array(zod.string()).optional(),
+  floor: zod.number().optional(),
+  status: zod.enum(["online", "offline", "busy"]).optional(),
+  bio: zod.string().optional(),
+});
+
+export const UpdateMyProfileResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  walletAddress: zod.string().nullish(),
+  avatar: zod.string().nullish(),
+  skills: zod.array(zod.string()),
+  floor: zod.number().nullish(),
+  status: zod.enum(["online", "offline", "busy"]),
+  bio: zod.string().nullish(),
+  bountiesCompleted: zod.number(),
+  bountiesCreated: zod.number(),
+  totalEarned: zod.number(),
+  createdAt: zod.date(),
+  userId: zod.string().nullish(),
+});
+
+/**
+ * @summary Claim an unlinked resident profile
+ */
+export const LinkResidentParams = zod.object({
+  residentId: zod.coerce.number(),
+});
+
+export const LinkResidentHeader = zod.object({
+  Authorization: zod
+    .string()
+    .optional()
+    .describe("Opaque session token — `Bearer <sid>`."),
+});
+
+export const LinkResidentResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  walletAddress: zod.string().nullish(),
+  avatar: zod.string().nullish(),
+  skills: zod.array(zod.string()),
+  floor: zod.number().nullish(),
+  status: zod.enum(["online", "offline", "busy"]),
+  bio: zod.string().nullish(),
+  bountiesCompleted: zod.number(),
+  bountiesCreated: zod.number(),
+  totalEarned: zod.number(),
+  createdAt: zod.date(),
+  userId: zod.string().nullish(),
+});
+
+/**
  * @summary List all residents
  */
 export const ListResidentsQueryParams = zod.object({
@@ -264,6 +368,7 @@ export const ListResidentsResponseItem = zod.object({
   bountiesCreated: zod.number(),
   totalEarned: zod.number(),
   createdAt: zod.date(),
+  userId: zod.string().nullish(),
 });
 export const ListResidentsResponse = zod.array(ListResidentsResponseItem);
 
@@ -299,6 +404,7 @@ export const GetResidentResponse = zod.object({
   bountiesCreated: zod.number(),
   totalEarned: zod.number(),
   createdAt: zod.date(),
+  userId: zod.string().nullish(),
 });
 
 /**
@@ -331,6 +437,7 @@ export const UpdateResidentResponse = zod.object({
   bountiesCreated: zod.number(),
   totalEarned: zod.number(),
   createdAt: zod.date(),
+  userId: zod.string().nullish(),
 });
 
 /**
@@ -361,6 +468,7 @@ export const ListTransactionsResponseItem = zod.object({
     "payout",
     "deposit",
     "refund",
+    "bounty_claim",
   ]),
   amount: zod.number(),
   token: zod.string(),

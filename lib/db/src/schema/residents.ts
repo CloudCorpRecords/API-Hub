@@ -1,6 +1,7 @@
 import { pgTable, serial, text, integer, numeric, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { usersTable } from "./auth";
 
 export const residentsTable = pgTable("residents", {
   id: serial("id").primaryKey(),
@@ -15,6 +16,8 @@ export const residentsTable = pgTable("residents", {
   bountiesCreated: integer("bounties_created").notNull().default(0),
   totalEarned: numeric("total_earned", { precision: 18, scale: 6 }).notNull().default("0"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  userId: text("user_id").unique().references(() => usersTable.id),
+  linkedAt: timestamp("linked_at"),
 });
 
 export const insertResidentSchema = createInsertSchema(residentsTable).omit({ id: true, createdAt: true, bountiesCompleted: true, bountiesCreated: true, totalEarned: true });

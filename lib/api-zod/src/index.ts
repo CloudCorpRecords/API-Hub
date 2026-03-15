@@ -12,6 +12,7 @@ export type {
   ListResidentsParams,
   ListTransactionsParams,
   LogoutSuccess,
+  MeResponse,
   MobileTokenExchangeRequest,
   MobileTokenExchangeSuccess,
   OpenaiConversation,

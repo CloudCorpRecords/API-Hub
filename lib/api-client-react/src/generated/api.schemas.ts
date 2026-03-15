@@ -122,6 +122,7 @@ export interface Resident {
   bountiesCreated: number;
   totalEarned: number;
   createdAt: string;
+  userId?: string | null;
 }
 
 export interface CreateResidentBody {
@@ -169,6 +170,7 @@ export const TransactionType = {
   payout: "payout",
   deposit: "deposit",
   refund: "refund",
+  bounty_claim: "bounty_claim",
 } as const;
 
 export interface Transaction {
@@ -215,6 +217,11 @@ export interface OpenaiConversationWithMessages {
 
 export interface OpenaiError {
   error: string;
+}
+
+export interface MeResponse {
+  user: AuthUser;
+  resident: Resident | null;
 }
 
 /**

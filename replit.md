@@ -49,7 +49,7 @@ artifacts-monorepo/
 - **sessions** — Replit Auth session store (sid, sess jsonb, expire)
 - **users** — Auth user profiles (id, email, firstName, lastName, profileImageUrl)
 - **bounties** — Task/bounty listings with title, description, reward (USDC), status (open/claimed/completed/cancelled), creator/claimer wallets, proof of work
-- **residents** — Community member profiles with name, wallet, skills (jsonb), floor, status (online/offline/busy), bio, stats
+- **residents** — Community member profiles with name, wallet, skills (jsonb), floor, status (online/offline/busy), bio, stats, userId (FK to users, unique, nullable), linkedAt
 - **transactions** — Treasury ledger (escrow_lock, escrow_release, payout, deposit, refund, bounty_claim) with amounts, wallets, bounty references
 - **conversations** — AI chat conversations
 - **messages** — Chat messages (user/assistant roles)
@@ -64,8 +64,13 @@ artifacts-monorepo/
 - `POST /api/bounties/:id/complete` — Submit proof and complete
 - `POST /api/bounties/:id/cancel` — Cancel and refund escrow
 
+### User Profile
+- `GET /api/me` — Get authenticated user's merged profile (auth user + resident data), 401 if not logged in
+- `PATCH /api/me` — Update own resident profile (skills, bio, floor, status, walletAddress, name)
+- `POST /api/me/link-resident/:residentId` — Claim an unlinked seed resident profile
+
 ### Residents
-- `GET /api/residents` — List residents (filter by skill)
+- `GET /api/residents` — List residents (filter by skill), includes `userId` field
 - `POST /api/residents` — Register a new resident
 - `GET /api/residents/:id` — Get resident details
 - `PATCH /api/residents/:id` — Update resident info
@@ -87,7 +92,8 @@ artifacts-monorepo/
 - **Landing** (`/`) — Hero page with CTA to enter the app
 - **Dashboard** (`/dashboard`) — System overview with live stats, recent bounties, real-time system log from transactions, Building Status floor panel with per-floor resident/issue indicators, Report Issue button
 - **Bounty Board** (`/bounties`) — Filterable bounty list with real-time search, create/claim/complete flows, proper proof submission modal (no window.prompt), supports `?floor=N&category=MAINTENANCE` URL params
-- **Resident Hub** (`/residents`) — Resident grid with skill tags and search, supports `?floor=N` URL filter
+- **Resident Hub** (`/residents`) — Resident grid with skill tags and search, supports `?floor=N` URL filter, VERIFIED badge on linked accounts
+- **Profile** (`/profile`) — Authenticated user's profile page with avatar, name, floor, skills, bio, bounty stats, and edit form
 - **Treasury** (`/treasury`) — Financial overview with real transaction-based chart, transaction ledger
 - **AI Concierge** (`/chat`) — Chat with Tower AI with real tool calling: list bounties, find residents by skill, check treasury, report issues. Live context injection. Tool status indicators stream inline.
 
@@ -102,9 +108,13 @@ Tower AI has access to 5 tools that query/mutate the live database:
 
 Each request includes a live context snapshot (open bounty count, treasury balance, resident count, recent transactions) injected into the system prompt. Tool call results stream back via SSE with inline status indicators ("Querying bounty board...", "Looking up residents...", etc.).
 
-## Auth & Wallet
+## Auth, Profile & Wallet
 
 - Auth uses Replit OIDC via `@workspace/replit-auth-web` → `useAuth()` hook
+- On first login, a resident profile is auto-created using the user's name and avatar
+- The sidebar user area (avatar + name + RESIDENT) links to `/profile`
+- A "COMPLETE YOUR PROFILE" banner shows on the dashboard if skills or bio are missing
+- Existing seed residents can be claimed via `POST /api/me/link-resident/:residentId`
 - When authenticated, the wallet identity is automatically set to `user_{id}` — no separate "Connect Wallet" step needed
 - The CONNECT_WALLET button in the header is hidden when the user is authenticated
 - Unauthenticated users can still manually connect a demo wallet

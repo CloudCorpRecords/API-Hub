@@ -33,6 +33,7 @@ import type {
   ListResidentsParams,
   ListTransactionsParams,
   LogoutSuccess,
+  MeResponse,
   MobileTokenExchangeRequest,
   MobileTokenExchangeSuccess,
   OpenaiConversation,
@@ -1176,6 +1177,251 @@ export const useCancelBounty = <
   TContext
 > => {
   return useMutation(getCancelBountyMutationOptions(options));
+};
+
+/**
+ * @summary Get the authenticated user's merged profile
+ */
+export const getGetMyProfileUrl = () => {
+  return `/api/me`;
+};
+
+export const getMyProfile = async (
+  options?: RequestInit,
+): Promise<MeResponse> => {
+  return customFetch<MeResponse>(getGetMyProfileUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMyProfileQueryKey = () => {
+  return [`/api/me`] as const;
+};
+
+export const getGetMyProfileQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMyProfile>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMyProfile>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMyProfileQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyProfile>>> = ({
+    signal,
+  }) => getMyProfile({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMyProfile>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetMyProfileQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMyProfile>>
+>;
+export type GetMyProfileQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Get the authenticated user's merged profile
+ */
+
+export function useGetMyProfile<
+  TData = Awaited<ReturnType<typeof getMyProfile>>,
+  TError = ErrorType<ApiError>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getMyProfile>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetMyProfileQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Update the authenticated user's resident profile
+ */
+export const getUpdateMyProfileUrl = () => {
+  return `/api/me`;
+};
+
+export const updateMyProfile = async (
+  updateResidentBody: UpdateResidentBody,
+  options?: RequestInit,
+): Promise<Resident> => {
+  return customFetch<Resident>(getUpdateMyProfileUrl(), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateResidentBody),
+  });
+};
+
+export const getUpdateMyProfileMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateMyProfile>>,
+    TError,
+    { data: BodyType<UpdateResidentBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateMyProfile>>,
+  TError,
+  { data: BodyType<UpdateResidentBody> },
+  TContext
+> => {
+  const mutationKey = ["updateMyProfile"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateMyProfile>>,
+    { data: BodyType<UpdateResidentBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return updateMyProfile(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateMyProfileMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateMyProfile>>
+>;
+export type UpdateMyProfileMutationBody = BodyType<UpdateResidentBody>;
+export type UpdateMyProfileMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Update the authenticated user's resident profile
+ */
+export const useUpdateMyProfile = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateMyProfile>>,
+    TError,
+    { data: BodyType<UpdateResidentBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateMyProfile>>,
+  TError,
+  { data: BodyType<UpdateResidentBody> },
+  TContext
+> => {
+  return useMutation(getUpdateMyProfileMutationOptions(options));
+};
+
+/**
+ * @summary Claim an unlinked resident profile
+ */
+export const getLinkResidentUrl = (residentId: number) => {
+  return `/api/me/link-resident/${residentId}`;
+};
+
+export const linkResident = async (
+  residentId: number,
+  options?: RequestInit,
+): Promise<Resident> => {
+  return customFetch<Resident>(getLinkResidentUrl(residentId), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getLinkResidentMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof linkResident>>,
+    TError,
+    { residentId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof linkResident>>,
+  TError,
+  { residentId: number },
+  TContext
+> => {
+  const mutationKey = ["linkResident"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof linkResident>>,
+    { residentId: number }
+  > = (props) => {
+    const { residentId } = props ?? {};
+
+    return linkResident(residentId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LinkResidentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof linkResident>>
+>;
+
+export type LinkResidentMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Claim an unlinked resident profile
+ */
+export const useLinkResident = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof linkResident>>,
+    TError,
+    { residentId: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof linkResident>>,
+  TError,
+  { residentId: number },
+  TContext
+> => {
+  return useMutation(getLinkResidentMutationOptions(options));
 };
 
 /**

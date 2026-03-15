@@ -3,7 +3,7 @@ import { useResidents, useCreateResidentMutation } from '@/hooks/use-residents';
 import { CyberCard } from '@/components/CyberCard';
 import { CyberButton } from '@/components/CyberButton';
 import { CyberInput } from '@/components/CyberInput';
-import { Search, MapPin, Award, Activity } from 'lucide-react';
+import { Search, MapPin, Award, Activity, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSearch } from 'wouter';
 
@@ -126,7 +126,14 @@ export default function Residents() {
                   }`} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold font-display text-foreground uppercase tracking-wider">{resident.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-bold font-display text-foreground uppercase tracking-wider">{resident.name}</h3>
+                    {resident.userId && (
+                      <span className="flex items-center gap-0.5 text-[9px] font-display tracking-widest text-accent bg-accent/10 border border-accent/30 px-1.5 py-0.5 uppercase">
+                        <Shield className="w-2.5 h-2.5" /> VERIFIED
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground font-sans mt-1">
                     <MapPin className="w-3 h-3" /> Sector {resident.floor || 'Unknown'}
                   </div>

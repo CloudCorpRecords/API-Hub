@@ -6,7 +6,8 @@ import {
   ExchangeMobileAuthorizationCodeResponse,
   LogoutMobileSessionResponse,
 } from "@workspace/api-zod";
-import { db, usersTable } from "@workspace/db";
+import { db, usersTable, residentsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import {
   clearSession,
   getOidcConfig,
@@ -79,6 +80,23 @@ async function upsertUser(claims: Record<string, unknown>) {
       },
     })
     .returning();
+
+  const [existingResident] = await db
+    .select()
+    .from(residentsTable)
+    .where(eq(residentsTable.userId, user.id));
+
+  if (!existingResident) {
+    const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || "Resident";
+    await db.insert(residentsTable).values({
+      name: displayName,
+      avatar: user.profileImageUrl || null,
+      userId: user.id,
+      linkedAt: new Date(),
+      skills: [],
+    });
+  }
+
   return user;
 }
 
