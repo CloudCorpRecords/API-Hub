@@ -116,10 +116,29 @@ export default function Chat() {
         {/* Message Thread */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 cyber-scrollbar relative z-10">
           {messages.length === 0 && !activeId && (
-            <div className="h-full flex flex-col items-center justify-center text-muted-foreground/50">
-              <Terminal className="w-12 h-12 mb-4 animate-pulse text-primary/40" />
-              <p className="font-display uppercase tracking-widest text-sm">Starting session...</p>
-              <p className="font-sans text-xs mt-2 text-muted-foreground/40">Connecting to Tower AI</p>
+            <div className="h-full flex flex-col items-center justify-center">
+              <Terminal className="w-14 h-14 mb-4 text-primary/30" />
+              <p className="font-display uppercase tracking-widest text-lg text-foreground mb-2">Tower AI</p>
+              <p className="font-sans text-sm text-muted-foreground mb-6">
+                {autoCreating ? 'Starting session...' : 'Your Frontier Road concierge'}
+              </p>
+              {!autoCreating && (
+                <CyberButton onClick={() => {
+                  setAutoCreating(true);
+                  createConversation('New Session')
+                    .then(conv => { setActiveId(conv.id); setTimeout(() => inputRef.current?.focus(), 100); })
+                    .catch(() => {})
+                    .finally(() => setAutoCreating(false));
+                }}>
+                  START_SESSION
+                </CyberButton>
+              )}
+              {autoCreating && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground/50">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                  Connecting...
+                </div>
+              )}
             </div>
           )}
           {messages.length === 0 && activeId && (
