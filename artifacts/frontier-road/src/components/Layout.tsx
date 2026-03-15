@@ -171,20 +171,22 @@ export function Layout({ children }: { children: ReactNode }) {
               )
             )}
 
-            {/* Wallet controls */}
-            {isConnected ? (
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-sans text-muted-foreground hidden sm:inline-block">
-                  {walletAddress?.slice(0,6)}...{walletAddress?.slice(-4)}
-                </span>
-                <CyberButton variant="ghost" onClick={disconnect} className="text-xs py-1 px-3">
-                  DISCONNECT
+            {/* Wallet controls — hidden when auth provides identity */}
+            {!isAuthenticated && (
+              isConnected ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-sans text-muted-foreground hidden sm:inline-block">
+                    {walletAddress?.slice(0,6)}...{walletAddress?.slice(-4)}
+                  </span>
+                  <CyberButton variant="ghost" onClick={disconnect} className="text-xs py-1 px-3">
+                    DISCONNECT
+                  </CyberButton>
+                </div>
+              ) : (
+                <CyberButton onClick={connect} className="text-xs py-1.5 px-4">
+                  CONNECT_WALLET
                 </CyberButton>
-              </div>
-            ) : (
-              <CyberButton onClick={connect} className="text-xs py-1.5 px-4">
-                CONNECT_WALLET
-              </CyberButton>
+              )
             )}
           </div>
         </header>

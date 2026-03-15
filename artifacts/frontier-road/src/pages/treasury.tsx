@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
 import { useTreasuryOverview, useTransactions } from '@/hooks/use-treasury';
 import { CyberCard } from '@/components/CyberCard';
-import { format } from 'date-fns';
+import { format, subDays, startOfDay } from 'date-fns';
 import { ArrowRightLeft, ArrowDownToLine, ArrowUpFromLine, Lock, Unlock } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
 
@@ -18,16 +19,35 @@ export default function Treasury() {
     }
   };
 
-  // Mock data for the chart to simulate network activity
-  const chartData = [
-    { name: 'Mon', value: 400 },
-    { name: 'Tue', value: 300 },
-    { name: 'Wed', value: 550 },
-    { name: 'Thu', value: 450 },
-    { name: 'Fri', value: 700 },
-    { name: 'Sat', value: 650 },
-    { name: 'Sun', value: 800 },
-  ];
+  const chartData = useMemo(() => {
+    const days: { name: string; value: number }[] = [];
+    const now = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const day = startOfDay(subDays(now, i));
+      const dayLabel = format(day, 'EEE');
+      const nextDay = startOfDay(subDays(now, i - 1));
+
+      let dayNet = 0;
+      (transactions || []).forEach(tx => {
+        const txDate = new Date(tx.createdAt);
+        if (txDate >= day && txDate < nextDay) {
+          if (tx.type === 'deposit' || tx.type === 'escrow_lock') {
+            dayNet += tx.amount;
+          } else if (tx.type === 'payout' || tx.type === 'refund') {
+            dayNet -= tx.amount;
+          }
+        }
+      });
+      days.push({ name: dayLabel, value: dayNet });
+    }
+
+    let cumulative = 0;
+    return days.map(d => {
+      cumulative += d.value;
+      return { name: d.name, value: Math.max(0, cumulative) };
+    });
+  }, [transactions]);
 
   return (
     <div className="space-y-8">
@@ -118,15 +138,16 @@ export default function Treasury() {
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="name" hide />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: 0, fontFamily: 'Space Mono' }}
                   itemStyle={{ color: 'hsl(var(--primary))' }}
+                  formatter={(value: number) => [`${value} USDC`, 'Balance']}
                 />
                 <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorValue)" />
               </AreaChart>
             </ResponsiveContainer>
           </CyberCard>
-          
+
           <div className="text-xs font-sans text-muted-foreground border border-border p-4 bg-background/50">
             <p className="text-primary mb-2 uppercase font-display tracking-widest">Smart Contract Status</p>
             <p>Wallet Adapter: ONLINE</p>

@@ -1,30 +1,175 @@
+import { useState } from 'react';
 import { CyberCard } from '@/components/CyberCard';
 import { CyberButton } from '@/components/CyberButton';
-import { useBounties } from '@/hooks/use-bounties';
-import { useTreasuryOverview } from '@/hooks/use-treasury';
+import { CyberInput } from '@/components/CyberInput';
+import { useBounties, useCreateBountyMutation } from '@/hooks/use-bounties';
+import { useTreasuryOverview, useTransactions } from '@/hooks/use-treasury';
 import { useResidents } from '@/hooks/use-residents';
-import { Activity, Crosshair, Users, Wallet } from 'lucide-react';
+import { useWallet } from '@/hooks/use-wallet';
+import { useToast } from '@/hooks/use-toast';
+import { Activity, Crosshair, Users, Wallet, AlertTriangle, X, Building2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Link } from 'wouter';
 import { motion } from 'framer-motion';
+import { format } from 'date-fns';
+import { useMemo } from 'react';
+
+function ReportIssueModal({ onClose }: { onClose: () => void }) {
+  const [floor, setFloor] = useState('');
+  const [location, setLocation] = useState('');
+  const [description, setDescription] = useState('');
+  const [urgency, setUrgency] = useState('Medium');
+  const { isConnected, walletAddress } = useWallet();
+  const { toast } = useToast();
+  const createMutation = useCreateBountyMutation();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isConnected || !walletAddress) {
+      toast({ title: "ACCESS DENIED", description: "Log in to report issues.", variant: "destructive" });
+      return;
+    }
+    const title = `[${urgency.toUpperCase()}] Floor ${floor} — ${location || 'General Area'}`;
+    const desc = `Floor: ${floor}\nLocation: ${location || 'N/A'}\nUrgency: ${urgency}\n\n${description}`;
+    try {
+      await createMutation.mutateAsync({
+        data: {
+          title,
+          description: desc,
+          rewardAmount: urgency === 'Urgent' ? 50 : urgency === 'Medium' ? 25 : 10,
+          category: 'MAINTENANCE',
+          creatorWallet: walletAddress,
+          rewardToken: 'USDC',
+        }
+      });
+      toast({ title: "ISSUE REPORTED", description: `Maintenance bounty created for Floor ${floor}.` });
+      onClose();
+    } catch {
+      toast({ title: "ERROR", description: "Failed to submit issue.", variant: "destructive" });
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-md border border-primary/40 bg-card p-6 space-y-5 shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <h3 className="text-lg font-display tracking-widest text-primary uppercase">Report Floor Issue</h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <CyberInput label="Floor Number" type="number" required value={floor} onChange={e => setFloor(e.target.value)} placeholder="1" />
+            <CyberInput label="Room / Location" value={location} onChange={e => setLocation(e.target.value)} placeholder="Kitchen" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-display tracking-widest text-primary uppercase">Description *</label>
+            <textarea
+              required
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              className="w-full bg-background/50 border border-border px-4 py-2.5 text-foreground font-sans text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all min-h-[100px]"
+              placeholder="Describe the issue..."
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-display tracking-widest text-primary uppercase">Urgency</label>
+            <select
+              value={urgency}
+              onChange={e => setUrgency(e.target.value)}
+              className="w-full bg-background/50 border border-border px-4 py-2.5 text-foreground font-sans text-sm focus:outline-none focus:border-primary"
+            >
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="Urgent">Urgent</option>
+            </select>
+          </div>
+          <div className="flex justify-end gap-3 pt-2 border-t border-border">
+            <CyberButton variant="ghost" onClick={onClose} className="text-xs" type="button">CANCEL</CyberButton>
+            <CyberButton type="submit" isLoading={createMutation.isPending} className="text-xs">SUBMIT_REPORT</CyberButton>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const EVENT_COLORS: Record<string, string> = {
+  escrow_lock: 'text-secondary',
+  payout: 'text-accent',
+  deposit: 'text-green-400',
+  refund: 'text-orange-400',
+  escrow_release: 'text-primary',
+};
+
+const EVENT_LABELS: Record<string, string> = {
+  escrow_lock: 'ESCROW_LOCKED',
+  payout: 'PAYOUT_SENT',
+  deposit: 'DEPOSIT',
+  refund: 'REFUND',
+  escrow_release: 'ESCROW_RELEASED',
+};
 
 export default function Dashboard() {
   const { data: bounties, isLoading: bountiesLoading } = useBounties('open');
+  const { data: allBounties } = useBounties();
   const { data: treasury, isLoading: treasuryLoading } = useTreasuryOverview();
   const { data: residents, isLoading: residentsLoading } = useResidents();
+  const { data: transactions } = useTransactions(8);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const activeBounties = bounties?.length || 0;
   const onlineResidents = residents?.filter(r => r.status === 'online').length || 0;
 
+  const floorStatus = useMemo(() => {
+    const floors: Record<number, { residents: number; online: number; issues: number; urgent: boolean }> = {};
+    residents?.forEach(r => {
+      const f = r.floor ?? 1;
+      if (!floors[f]) floors[f] = { residents: 0, online: 0, issues: 0, urgent: false };
+      floors[f].residents++;
+      if (r.status === 'online') floors[f].online++;
+    });
+
+    const maintenanceBounties = (allBounties || []).filter(
+      b => b.category === 'MAINTENANCE' && (b.status === 'open' || b.status === 'claimed')
+    );
+    maintenanceBounties.forEach(b => {
+      const match = (b.title + ' ' + b.description).match(/floor\s+(\d+)/i);
+      const f = match ? parseInt(match[1]) : 1;
+      if (!floors[f]) floors[f] = { residents: 0, online: 0, issues: 0, urgent: false };
+      floors[f].issues++;
+      if (b.title.toLowerCase().includes('[urgent]')) floors[f].urgent = true;
+    });
+
+    const sorted = Object.entries(floors)
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([floor, data]) => ({ floor: Number(floor), ...data }));
+
+    if (sorted.length === 0) {
+      return [
+        { floor: 1, residents: 0, online: 0, issues: 0, urgent: false },
+        { floor: 2, residents: 0, online: 0, issues: 0, urgent: false },
+        { floor: 3, residents: 0, online: 0, issues: 0, urgent: false },
+      ];
+    }
+    return sorted;
+  }, [residents, allBounties]);
+
   return (
     <div className="space-y-8 pb-12">
+      {showReportModal && <ReportIssueModal onClose={() => setShowReportModal(false)} />}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border/50 pb-6">
         <div>
           <h1 className="text-3xl font-display font-bold text-primary mb-2 glitch-text" data-text="SYSTEM_OVERVIEW">SYSTEM_OVERVIEW</h1>
           <p className="text-muted-foreground font-sans text-sm tracking-widest uppercase">Monitoring Frontier Road parameters</p>
         </div>
-        <Link href="/bounties">
-          <CyberButton>POST_BOUNTY</CyberButton>
-        </Link>
+        <div className="flex items-center gap-3">
+          <CyberButton variant="secondary" onClick={() => setShowReportModal(true)} className="text-xs">
+            <AlertTriangle className="w-4 h-4 mr-1" /> REPORT_ISSUE
+          </CyberButton>
+          <Link href="/bounties">
+            <CyberButton>POST_BOUNTY</CyberButton>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -36,7 +181,7 @@ export default function Dashboard() {
           <div className="text-4xl font-sans font-bold text-foreground">
             {bountiesLoading ? '--' : activeBounties}
           </div>
-          <div className="mt-2 text-xs text-primary/70 font-sans">+2 in last 24h</div>
+          <div className="mt-2 text-xs text-primary/70 font-sans">Open tasks</div>
         </CyberCard>
 
         <CyberCard glow delay={0.2}>
@@ -81,6 +226,56 @@ export default function Dashboard() {
         </CyberCard>
       </div>
 
+      {/* Building Status */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-display font-bold text-foreground border-l-4 border-primary pl-3 uppercase tracking-widest">
+          Building Status
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {floorStatus.map(fs => {
+            const statusColor = fs.urgent ? 'border-red-500/50 bg-red-500/5' : fs.issues > 0 ? 'border-yellow-500/50 bg-yellow-500/5' : 'border-accent/30 bg-accent/5';
+            const dotColor = fs.urgent ? 'bg-red-500' : fs.issues > 0 ? 'bg-yellow-500' : 'bg-accent';
+            return (
+              <CyberCard key={fs.floor} className={`${statusColor} p-4`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-display tracking-widest text-sm text-foreground uppercase">Floor {fs.floor}</span>
+                  </div>
+                  <span className={`w-2.5 h-2.5 rounded-full ${dotColor} ${fs.urgent ? 'animate-pulse' : ''}`} />
+                </div>
+                <div className="flex items-center justify-between text-xs font-sans text-muted-foreground mb-2">
+                  <span>{fs.online} online / {fs.residents} residents</span>
+                </div>
+                {fs.issues > 0 ? (
+                  <div className="flex items-center gap-1.5 text-xs font-sans">
+                    <AlertCircle className="w-3.5 h-3.5 text-yellow-500" />
+                    <span className="text-yellow-500">{fs.issues} open issue{fs.issues > 1 ? 's' : ''}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs font-sans">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
+                    <span className="text-accent">All clear</span>
+                  </div>
+                )}
+                <div className="mt-3 flex gap-2">
+                  <Link href={`/bounties?floor=${fs.floor}&category=MAINTENANCE`}>
+                    <button className="text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary border border-border hover:border-primary px-2 py-1 transition-all">
+                      Issues
+                    </button>
+                  </Link>
+                  <Link href={`/residents?floor=${fs.floor}`}>
+                    <button className="text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary border border-border hover:border-primary px-2 py-1 transition-all">
+                      Residents
+                    </button>
+                  </Link>
+                </div>
+              </CyberCard>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-xl font-display font-bold text-foreground border-l-4 border-secondary pl-3 uppercase tracking-widest">
@@ -95,7 +290,7 @@ export default function Dashboard() {
           ) : bounties && bounties.length > 0 ? (
             <div className="space-y-4">
               {bounties.slice(0, 3).map((bounty, i) => (
-                <motion.div 
+                <motion.div
                   key={bounty.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -140,22 +335,22 @@ export default function Dashboard() {
           </h2>
           <CyberCard className="p-0 overflow-hidden h-[300px]">
             <div className="p-4 space-y-4 text-xs font-sans h-full overflow-y-auto cyber-scrollbar">
-              <div className="border-b border-border/50 pb-2">
-                <span className="text-muted-foreground">[08:42:11]</span> <span className="text-accent">RESIDENT_JOIN</span> <br/>
-                0x7F...3A9 connected from Floor 3
-              </div>
-              <div className="border-b border-border/50 pb-2">
-                <span className="text-muted-foreground">[07:15:00]</span> <span className="text-secondary">ESCROW_LOCKED</span> <br/>
-                250 USDC secured for Bounty #0042
-              </div>
-              <div className="border-b border-border/50 pb-2">
-                <span className="text-muted-foreground">[06:33:22]</span> <span className="text-primary">BOUNTY_CLAIMED</span> <br/>
-                Resident 'Neo' claimed "Fix Router Config"
-              </div>
-              <div className="pb-2">
-                <span className="text-muted-foreground">[01:05:00]</span> <span className="text-foreground">SYS_UPDATE</span> <br/>
-                TowerOS routine maintenance completed.
-              </div>
+              {transactions && transactions.length > 0 ? (
+                transactions.map(tx => (
+                  <div key={tx.id} className="border-b border-border/50 pb-2">
+                    <span className="text-muted-foreground">[{format(new Date(tx.createdAt), 'HH:mm:ss')}]</span>{' '}
+                    <span className={EVENT_COLORS[tx.type] || 'text-foreground'}>
+                      {EVENT_LABELS[tx.type] || tx.type.toUpperCase().replace('_', '_')}
+                    </span>
+                    <br />
+                    {tx.description || `${tx.amount} ${tx.token}`}
+                  </div>
+                ))
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground/50">
+                  No events recorded yet.
+                </div>
+              )}
             </div>
           </CyberCard>
         </div>

@@ -84,11 +84,19 @@ artifacts-monorepo/
 
 ## Frontend Pages
 
-- **Dashboard** (`/`) — System overview with live stats, recent bounties, activity log
-- **Bounty Board** (`/bounties`) — Filterable bounty list with create/claim/complete flows
-- **Resident Hub** (`/residents`) — Resident grid with skill tags and search
-- **Treasury** (`/treasury`) — Financial overview with transaction ledger
-- **AI Concierge** (`/chat`) — Chat with Tower AI assistant
+- **Landing** (`/`) — Hero page with CTA to enter the app
+- **Dashboard** (`/dashboard`) — System overview with live stats, recent bounties, real-time system log from transactions, Building Status floor panel with per-floor resident/issue indicators, Report Issue button
+- **Bounty Board** (`/bounties`) — Filterable bounty list with real-time search, create/claim/complete flows, proper proof submission modal (no window.prompt), supports `?floor=N&category=MAINTENANCE` URL params
+- **Resident Hub** (`/residents`) — Resident grid with skill tags and search, supports `?floor=N` URL filter
+- **Treasury** (`/treasury`) — Financial overview with real transaction-based chart, transaction ledger
+- **AI Concierge** (`/chat`) — Chat with Tower AI, auto-creates session if none exist
+
+## Auth & Wallet
+
+- Auth uses Replit OIDC via `@workspace/replit-auth-web` → `useAuth()` hook
+- When authenticated, the wallet identity is automatically set to `user_{id}` — no separate "Connect Wallet" step needed
+- The CONNECT_WALLET button in the header is hidden when the user is authenticated
+- Unauthenticated users can still manually connect a demo wallet
 
 ## Development
 

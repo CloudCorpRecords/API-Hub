@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useResidents, useCreateResidentMutation } from '@/hooks/use-residents';
 import { CyberCard } from '@/components/CyberCard';
 import { CyberButton } from '@/components/CyberButton';
 import { CyberInput } from '@/components/CyberInput';
 import { Search, MapPin, Award, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSearch } from 'wouter';
 
 export default function Residents() {
+  const searchString = useSearch();
+  const params = new URLSearchParams(searchString);
+  const floorFilter = params.get('floor');
+
   const [search, setSearch] = useState('');
   const { data: residents, isLoading } = useResidents();
   const [isRegistering, setIsRegistering] = useState(false);
@@ -15,10 +20,20 @@ export default function Residents() {
   
   const [form, setForm] = useState({ name: '', skills: '', floor: '', bio: '' });
 
-  const filtered = residents?.filter(r => 
-    r.name.toLowerCase().includes(search.toLowerCase()) || 
-    r.skills.some(s => s.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = useMemo(() => {
+    let result = residents || [];
+    if (floorFilter) {
+      result = result.filter(r => r.floor === parseInt(floorFilter));
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(r =>
+        r.name.toLowerCase().includes(q) ||
+        r.skills.some(s => s.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  }, [residents, search, floorFilter]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +59,10 @@ export default function Residents() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-display font-bold text-foreground tracking-widest uppercase">Resident_Hub</h1>
-          <p className="text-muted-foreground font-sans text-sm">Identity matrix and skill matching</p>
+          <p className="text-muted-foreground font-sans text-sm">
+            Identity matrix and skill matching
+            {floorFilter && <span className="ml-2 text-primary">[Floor {floorFilter}]</span>}
+          </p>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
           <div className="relative flex-1 md:w-64">
