@@ -16,6 +16,7 @@ The architecture is API-first — all functionality is exposed via REST endpoint
 - **API framework**: Express 5
 - **Database**: PostgreSQL + Drizzle ORM
 - **AI**: OpenAI via Replit AI Integrations (gpt-4o for chat with tool calling)
+- **Blockchain**: Solana (`@solana/web3.js`) — devnet wallet, balance queries, real SOL transfers
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
@@ -87,6 +88,9 @@ artifacts-monorepo/
 - `GET /api/openai/conversations/:id/messages` — List messages
 - `POST /api/openai/conversations/:id/messages` — Send message (SSE stream)
 
+### Solana
+- `GET /api/solana/tower-wallet` — Returns Tower AI's Solana wallet address, live SOL balance, network, Solana Explorer URL, and current slot
+
 ## Frontend Pages
 
 - **Landing** (`/`) — Hero page with CTA to enter the app
@@ -94,19 +98,31 @@ artifacts-monorepo/
 - **Bounty Board** (`/bounties`) — Filterable bounty list with real-time search, create/claim/complete flows, proper proof submission modal (no window.prompt), supports `?floor=N&category=MAINTENANCE` URL params
 - **Resident Hub** (`/residents`) — Resident grid with skill tags and search, supports `?floor=N` URL filter, VERIFIED badge on linked accounts
 - **Profile** (`/profile`) — Authenticated user's profile page with avatar, name, floor, skills, bio, bounty stats, and edit form
-- **Treasury** (`/treasury`) — Financial overview with real transaction-based chart, transaction ledger
+- **Treasury** (`/treasury`) — Financial overview with real transaction-based chart, transaction ledger, and Tower AI Solana wallet panel (live devnet balance, explorer link, devnet SOL request button)
 - **AI Concierge** (`/chat`) — Chat with Tower AI with real tool calling: list bounties, find residents by skill, check treasury, report issues. Live context injection. Tool status indicators stream inline.
 
 ## Tower AI Tool Calling
 
-Tower AI has access to 5 tools that query/mutate the live database:
+Tower AI has access to 7 tools that query/mutate the live database and Solana blockchain:
 - **list_bounties(status?, category?, floor?)** — Search bounties with filters
 - **find_residents_by_skill(skill)** — Find residents by skill keyword match
 - **get_residents_by_floor(floor)** — List all residents on a floor
 - **get_treasury_status()** — Live treasury balance, escrow, payouts
 - **report_floor_issue(floor, location, description, urgency?)** — Creates MAINTENANCE bounty
+- **get_wallet_balance(wallet_address)** — Queries any Solana wallet's SOL balance on devnet in real time
+- **execute_solana_transfer(recipient_wallet, amount_sol, reason)** — Signs and broadcasts a real SOL transfer from Tower's devnet wallet; saves tx signature to DB ledger
 
-Each request includes a live context snapshot (open bounty count, treasury balance, resident count, recent transactions) injected into the system prompt. Tool call results stream back via SSE with inline status indicators ("Querying bounty board...", "Looking up residents...", etc.).
+Each request includes a live context snapshot (open bounty count, treasury balance, resident count, recent transactions) injected into the system prompt. Tool call results stream back via SSE with inline status indicators ("Querying bounty board...", "Checking Solana wallet...", "Executing on-chain transfer...", etc.).
+
+## Solana Integration Details
+
+- **Tower wallet**: `BG2YdWeTMYFHNxkUBtTemrSuqHpwL5MqG27qF85jtHVp` (Solana devnet)
+- **Lib**: `artifacts/api-server/src/lib/solana.ts` — connection, keypair loading, `getSolBalance()`, `transferSol()`, explorer URL helpers
+- **Route**: `artifacts/api-server/src/routes/solana.ts` — `GET /api/solana/tower-wallet`
+- **Frontend hook**: `useTowerWallet()` in `artifacts/frontier-road/src/hooks/use-treasury.ts` — polls every 30s
+- **Treasury page panel**: shows network badge, live SOL balance, full address, Solana Explorer link, and a "Request Devnet SOL" button (client-side browser fetch to bypass server IP rate limits)
+- **Transfer cap**: 1 SOL max per transaction on devnet (safety guard)
+- **On-chain payouts are recorded**: tx signature saved to the `transactions` table with `type="payout"` and `token="SOL"`
 
 ## Auth, Profile, Security & Wallet
 
@@ -140,3 +156,6 @@ Each request includes a live context snapshot (open bounty count, treasury balan
 - `AI_INTEGRATIONS_OPENAI_BASE_URL` — OpenAI proxy URL (auto-provisioned)
 - `AI_INTEGRATIONS_OPENAI_API_KEY` — OpenAI API key (auto-provisioned)
 - `PORT` — API server port (auto-assigned)
+- `TOWER_SOLANA_PRIVATE_KEY` — Tower AI's Solana wallet private key (base64-encoded 64-byte secret key)
+- `TOWER_SOLANA_PUBKEY` — Tower AI's Solana wallet public address (`BG2YdWeTMYFHNxkUBtTemrSuqHpwL5MqG27qF85jtHVp`)
+- `SOLANA_NETWORK` — Solana network (`devnet` or `mainnet-beta`, defaults to `devnet`)

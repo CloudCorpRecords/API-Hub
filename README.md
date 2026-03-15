@@ -16,22 +16,50 @@ Frontier Road is a full-stack platform that gives co-living communities a shared
 Residents post tasks with a USDC reward attached. Anyone in the community can claim a bounty, do the work, and submit proof to get paid. Every transaction — escrow lock, claim, payout, refund — is recorded in the treasury ledger. Floor issues (broken heaters, WiFi outages, etc.) can be posted as maintenance bounties directly from the dashboard or by telling Tower AI.
 
 ### Tower AI Concierge
-Tower is an AI assistant that knows the live state of your community. Ask it in plain English:
+Tower is an AI assistant that knows the live state of your community — and can take real on-chain action on Solana. Ask it in plain English:
 - *"What bounties are open right now?"*
 - *"Who on floor 3 knows networking?"*
 - *"Report a broken heater in the floor 2 kitchen"*
 - *"How much is in the treasury?"*
+- *"What's the SOL balance of wallet ABC...?"*
+- *"Send 0.1 SOL to wallet XYZ... for completing bounty #5"*
 
-Tower answers using real data from the database and streams its response word by word. When it needs to look something up, you see a live indicator ("Querying bounty board...") before the answer arrives.
+Tower answers using real data from the database and streams its response word by word. When it needs to look something up or execute an on-chain transaction, you see a live status indicator before the answer arrives. Solana transfers are recorded to the ledger with a real transaction signature you can verify on Solana Explorer.
 
 ### Resident Hub
 Every community member gets a profile with their skills, floor, bio, and stats (bounties completed, USDC earned). Profiles linked to a real Replit login show a **Verified** badge. You can search residents by skill to find who can help with a specific task.
 
 ### Treasury
-A live financial dashboard showing the total community pool, how much is locked in escrow for active bounties, total paid out over time, and a full transaction ledger. No real blockchain required — all accounting is handled in the database.
+A live financial dashboard showing the total community pool, how much is locked in escrow for active bounties, total paid out over time, and a full transaction ledger. The treasury also shows Tower AI's live Solana wallet — a real devnet wallet with a balance, address, and link to Solana Explorer. On-chain payouts executed by Tower AI appear in the ledger with their Solana transaction signatures.
 
 ### Profile System
 When you log in for the first time, a resident profile is automatically created from your Replit identity (name and avatar). You can then fill in your skills, bio, and floor. If you were already in the system as a seed resident, you can claim that profile and link it to your account.
+
+---
+
+## Solana integration
+
+Tower AI has a real Solana wallet that operates on devnet. The integration uses `@solana/web3.js` directly — no third-party abstraction layer.
+
+**What Tower can do on-chain:**
+
+| Tower AI tool | What it does |
+|---------------|-------------|
+| `get_wallet_balance` | Queries any Solana wallet's SOL balance from devnet in real time |
+| `execute_solana_transfer` | Signs and broadcasts a real SOL transfer from Tower's wallet to any recipient address |
+
+**How a payout works:**
+1. A resident completes a bounty and submits proof of work
+2. You (or Tower AI autonomously) call: *"Send 0.1 SOL to wallet ABC... for bounty #5"*
+3. Tower checks its own balance, signs the transaction, and broadcasts it to Solana devnet
+4. The Solana transaction signature is saved to the treasury ledger
+5. The transaction is immediately visible on [Solana Explorer](https://explorer.solana.com/?cluster=devnet)
+
+**Tower's wallet:** `BG2YdWeTMYFHNxkUBtTemrSuqHpwL5MqG27qF85jtHVp` ([view on Explorer](https://explorer.solana.com/address/BG2YdWeTMYFHNxkUBtTemrSuqHpwL5MqG27qF85jtHVp?cluster=devnet))
+
+**REST endpoint:** `GET /api/solana/tower-wallet` — returns the wallet address, live SOL balance, network, Solana Explorer URL, and current slot number. The Treasury page polls this every 30 seconds.
+
+**Funding on devnet:** The Treasury page includes a "Request Devnet SOL" button that calls the Solana devnet RPC directly from the browser (bypassing any server-side rate limits). If rate-limited, it links directly to [faucet.solana.com](https://faucet.solana.com).
 
 ---
 
@@ -75,6 +103,7 @@ See the [API Reference](./API_REFERENCE.md) for the complete Mobile Auth Quick S
 | Backend | Node.js, Express 5 |
 | Database | PostgreSQL, Drizzle ORM |
 | AI | OpenAI gpt-4o with tool calling, SSE streaming |
+| Blockchain | Solana (`@solana/web3.js`), devnet — real wallet, balance queries, SOL transfers |
 | Auth | Replit OIDC (PKCE) |
 | Validation | Zod |
 | API codegen | OpenAPI spec → Orval (React Query hooks + Zod schemas) |
@@ -116,14 +145,17 @@ pnpm --filter @workspace/api-spec run codegen
 
 ## Environment variables
 
-All are auto-provisioned in the Replit environment:
-
 | Variable | Purpose |
 |----------|---------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `AI_INTEGRATIONS_OPENAI_BASE_URL` | OpenAI proxy base URL |
-| `AI_INTEGRATIONS_OPENAI_API_KEY` | OpenAI API key |
-| `PORT` | API server port |
+| `DATABASE_URL` | PostgreSQL connection string (auto-provisioned) |
+| `AI_INTEGRATIONS_OPENAI_BASE_URL` | OpenAI proxy base URL (auto-provisioned) |
+| `AI_INTEGRATIONS_OPENAI_API_KEY` | OpenAI API key (auto-provisioned) |
+| `PORT` | API server port (auto-provisioned) |
+| `TOWER_SOLANA_PRIVATE_KEY` | Tower AI's Solana wallet private key (base64) |
+| `TOWER_SOLANA_PUBKEY` | Tower AI's Solana wallet public address |
+| `SOLANA_NETWORK` | Solana network to use (`devnet` or `mainnet-beta`) |
+
+To fund the Tower AI wallet on devnet, visit the Treasury page and click **"Request Devnet SOL"** — or go to [faucet.solana.com](https://faucet.solana.com) and enter the address from `TOWER_SOLANA_PUBKEY`.
 
 ---
 
