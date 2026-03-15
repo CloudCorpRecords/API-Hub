@@ -15,7 +15,7 @@ import { useWallet } from '@/hooks/use-wallet';
 import { CyberButton } from './CyberButton';
 
 const navItems = [
-  { href: '/', label: 'SYS_DASHBOARD', icon: TerminalSquare },
+  { href: '/dashboard', label: 'SYS_DASHBOARD', icon: TerminalSquare },
   { href: '/bounties', label: 'BOUNTY_BOARD', icon: Crosshair },
   { href: '/residents', label: 'RESIDENT_HUB', icon: Users },
   { href: '/treasury', label: 'TREASURY_LINK', icon: Wallet },
@@ -31,7 +31,7 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background flex text-foreground selection:bg-primary/30 selection:text-primary">
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card/50 backdrop-blur-md relative z-20">
-        <div className="p-6 border-b border-border flex items-center gap-3">
+        <Link href="/" className="p-6 border-b border-border flex items-center gap-3 hover:bg-primary/5 transition-colors">
           <Cpu className="w-8 h-8 text-primary animate-pulse" />
           <div>
             <h1 className="font-display font-bold text-xl tracking-widest text-primary glitch-text" data-text="FRONTIER_ROAD">
@@ -39,11 +39,11 @@ export function Layout({ children }: { children: ReactNode }) {
             </h1>
             <p className="text-[10px] text-muted-foreground tracking-[0.3em]">COMMUNITY_OS v1.0</p>
           </div>
-        </div>
+        </Link>
 
         <nav className="flex-1 py-6 px-4 flex flex-col gap-2">
           {navItems.map((item) => {
-            const isActive = location === item.href || (item.href !== '/' && location.startsWith(item.href));
+            const isActive = location === item.href || location.startsWith(item.href);
             return (
               <Link 
                 key={item.href} 
@@ -133,7 +133,7 @@ export function Layout({ children }: { children: ReactNode }) {
             </div>
             <nav className="flex-1 py-4 flex flex-col gap-1 px-2">
               {navItems.map((item) => {
-                const isActive = location === item.href || (item.href !== '/' && location.startsWith(item.href));
+                const isActive = location === item.href || location.startsWith(item.href);
                 return (
                   <Link 
                     key={item.href} 

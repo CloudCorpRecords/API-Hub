@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/Layout";
 import { WalletProvider } from "@/hooks/use-wallet";
 
+import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Bounties from "@/pages/bounties";
 import Residents from "@/pages/residents";
@@ -23,16 +24,21 @@ const queryClient = new QueryClient({
 
 function Router() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/bounties" component={Bounties} />
-        <Route path="/residents" component={Residents} />
-        <Route path="/treasury" component={Treasury} />
-        <Route path="/chat" component={Chat} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/" component={Landing} />
+      <Route>
+        <Layout>
+          <Switch>
+            <Route path="/dashboard" component={Dashboard} />
+            <Route path="/bounties" component={Bounties} />
+            <Route path="/residents" component={Residents} />
+            <Route path="/treasury" component={Treasury} />
+            <Route path="/chat" component={Chat} />
+            <Route component={NotFound} />
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
 
