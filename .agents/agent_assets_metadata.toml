@@ -6,3 +6,9 @@ id = "4mF5OdHrDAs-tneKPygbs"
 uri = "file://FRONTIER_ROAD_GUIDE.md"
 type = "text"
 title = "Frontier Road — How It Works"
+
+[[outputs]]
+id = "89C4BEBj1fXwiQz1cV9Bl"
+uri = "file://API_REFERENCE.md"
+type = "text"
+title = "Frontier Road API Reference"
