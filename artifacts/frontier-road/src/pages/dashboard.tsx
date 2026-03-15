@@ -156,8 +156,8 @@ export default function Dashboard() {
             const statusColor = fs.urgent ? 'border-red-500/50 bg-red-500/5' : fs.issues > 0 ? 'border-yellow-500/50 bg-yellow-500/5' : 'border-accent/30 bg-accent/5';
             const dotColor = fs.urgent ? 'bg-red-500' : fs.issues > 0 ? 'bg-yellow-500' : 'bg-accent';
             return (
-              <Link key={fs.floor} href={fs.issues > 0 ? `/bounties?floor=${fs.floor}&category=MAINTENANCE` : `/residents?floor=${fs.floor}`}>
-                <CyberCard className={`${statusColor} p-4 cursor-pointer hover:scale-[1.02] transition-transform`}>
+              <CyberCard key={fs.floor} className={`${statusColor} p-4`}>
+                <Link href={`/residents?floor=${fs.floor}`} className="block cursor-pointer">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Building2 className="w-4 h-4 text-muted-foreground" />
@@ -179,11 +179,17 @@ export default function Dashboard() {
                       <span className="text-accent">All clear</span>
                     </div>
                   )}
-                  <div className="mt-3 flex gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Click to view floor details &rarr;
+                </Link>
+                {fs.issues > 0 && (
+                  <div className="mt-3 pt-2 border-t border-border/30">
+                    <Link href={`/bounties?floor=${fs.floor}&category=MAINTENANCE`}>
+                      <span className="text-[10px] uppercase tracking-widest text-yellow-500 hover:text-yellow-400 transition-colors cursor-pointer">
+                        View {fs.issues} maintenance issue{fs.issues > 1 ? 's' : ''} &rarr;
+                      </span>
+                    </Link>
                   </div>
-                </CyberCard>
-              </Link>
+                )}
+              </CyberCard>
             );
           })}
         </div>
