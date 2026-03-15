@@ -278,7 +278,7 @@ async function executeToolCall(name: string, args: Record<string, unknown>): Pro
 
         return JSON.stringify({
           count: rows.length,
-          bounties: rows.slice(0, 10).map(b => ({
+          bounties: rows.slice(0, 25).map(b => ({
             id: b.id,
             title: b.title,
             description: b.description.slice(0, 150),
