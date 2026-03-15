@@ -24,3 +24,10 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+[userenv]
+
+[userenv.shared]
+TOWER_SOLANA_PRIVATE_KEY = "xspow4Q5SEkpnzHOmWqBQz1AAHrvyHbk7w/1rKonwKiYblQmyqt9ZH4hEHuwuY+02lCZakk17E8Y57DtCKZQnw=="
+TOWER_SOLANA_PUBKEY = "BG2YdWeTMYFHNxkUBtTemrSuqHpwL5MqG27qF85jtHVp"
+SOLANA_NETWORK = "devnet"

@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
-import { useTreasuryOverview, useTransactions } from '@/hooks/use-treasury';
+import { useTreasuryOverview, useTransactions, useTowerWallet } from '@/hooks/use-treasury';
 import { CyberCard } from '@/components/CyberCard';
 import { format, subDays, startOfDay } from 'date-fns';
-import { ArrowRightLeft, ArrowDownToLine, ArrowUpFromLine, Lock, Unlock } from 'lucide-react';
+import { ArrowRightLeft, ArrowDownToLine, ArrowUpFromLine, Lock, Unlock, ExternalLink, Wallet, Zap } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
 
 export default function Treasury() {
   const { data: overview, isLoading: overviewLoading } = useTreasuryOverview();
   const { data: transactions, isLoading: txLoading } = useTransactions(100);
+  const { data: towerWallet, isLoading: walletLoading, error: walletError } = useTowerWallet();
 
   const getIconForType = (type: string) => {
     switch(type) {
@@ -154,6 +155,47 @@ export default function Treasury() {
             <p>Devnet RPC: CONNECTED</p>
             <p>Escrow Program: VERIFIED</p>
           </div>
+
+          <CyberCard className="border-accent/30">
+            <div className="flex items-center gap-2 mb-3">
+              <Wallet className="w-4 h-4 text-accent" />
+              <p className="text-xs font-display tracking-[0.2em] text-accent uppercase">Tower AI Wallet</p>
+            </div>
+            {walletLoading ? (
+              <p className="text-xs text-muted-foreground">Connecting to Solana...</p>
+            ) : walletError ? (
+              <p className="text-xs text-destructive">Wallet offline</p>
+            ) : towerWallet ? (
+              <div className="space-y-2">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Network</p>
+                  <div className="flex items-center gap-1.5">
+                    <Zap className="w-3 h-3 text-accent" />
+                    <span className="text-xs font-display text-accent uppercase">{towerWallet.network}</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Balance</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {towerWallet.balanceSol.toFixed(4)} <span className="text-sm text-muted-foreground">SOL</span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Address</p>
+                  <p className="font-mono text-[10px] text-primary/80 break-all">{towerWallet.address}</p>
+                </div>
+                <a
+                  href={towerWallet.explorerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-[10px] text-accent hover:text-accent/80 transition-colors mt-1"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  View on Solana Explorer
+                </a>
+              </div>
+            ) : null}
+          </CyberCard>
         </div>
       </div>
     </div>

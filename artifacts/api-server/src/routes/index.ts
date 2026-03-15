@@ -6,6 +6,7 @@ import residentsRouter from "./residents";
 import treasuryRouter from "./treasury";
 import openaiRouter from "./openai";
 import meRouter from "./me";
+import solanaRouter from "./solana";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(bountiesRouter);
 router.use(residentsRouter);
 router.use(treasuryRouter);
 router.use(openaiRouter);
+router.use(solanaRouter);
 
 export default router;

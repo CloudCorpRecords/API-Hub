@@ -16,6 +16,15 @@ import { eq, asc, desc, sql } from "drizzle-orm";
 import type { ChatCompletionMessageParam, ChatCompletionToolMessageParam, ChatCompletionAssistantMessageParam } from "openai/resources/chat/completions";
 import { requireAuth } from "../middlewares/requireAuth";
 import { towerAiMessageLimiter } from "../middlewares/rateLimiter";
+import {
+  getSolBalance,
+  getTowerKeypair,
+  getTowerPublicKey,
+  transferSol,
+  explorerTxUrl,
+  explorerAddressUrl,
+  SOLANA_NETWORK,
+} from "../lib/solana";
 
 type PendingToolCall = {
   id: string;
@@ -41,6 +50,11 @@ You are the building's intelligent assistant. You have direct access to the Fron
    - Example: "how much is in the treasury?", "what's our balance?"
 5. **Report a floor issue** — Create a MAINTENANCE bounty for a reported problem (broken heater, leaky pipe, etc.).
    - Example: "report a broken heater on floor 2", "the kitchen sink on floor 1 is clogged"
+6. **Check Solana wallet balance** — Query any resident's SOL balance on Solana ${SOLANA_NETWORK}.
+   - Example: "what's my wallet balance?", "check wallet BG2Yd...", "how much SOL does floor 3 have?"
+7. **Send SOL on-chain** — Execute a real Solana transfer from Tower's wallet to a resident's wallet as bounty payment.
+   - Example: "pay out bounty #5 to wallet ABC...", "send 0.1 SOL to resident wallet"
+   - Only use this when explicitly asked to send a payment. Always confirm the recipient address and amount before transferring.
 
 ## How to Respond
 - Be concise and direct. Use short sentences.
@@ -159,6 +173,48 @@ const TOOL_DEFINITIONS = [
       },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_wallet_balance",
+      description: "Check the SOL balance of any Solana wallet address on devnet. Use this when residents ask about their wallet balance or when verifying a recipient before sending payment.",
+      parameters: {
+        type: "object",
+        properties: {
+          wallet_address: {
+            type: "string",
+            description: "The Solana wallet address (base58-encoded public key) to check.",
+          },
+        },
+        required: ["wallet_address"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "execute_solana_transfer",
+      description: "Send SOL from Tower AI's devnet wallet to a resident's Solana wallet as a bounty payout or reward. This executes a real on-chain transaction on Solana devnet. Only use this when explicitly instructed to send a payment.",
+      parameters: {
+        type: "object",
+        properties: {
+          recipient_wallet: {
+            type: "string",
+            description: "The recipient's Solana wallet address (base58-encoded public key).",
+          },
+          amount_sol: {
+            type: "number",
+            description: "Amount of SOL to send (e.g. 0.05 for a small bounty, 0.1 for a larger one).",
+          },
+          reason: {
+            type: "string",
+            description: "Description of why this payment is being sent (e.g. 'Bounty #12 payout — fixed elevator sensor').",
+          },
+        },
+        required: ["recipient_wallet", "amount_sol", "reason"],
+      },
+    },
+  },
 ];
 
 const TOOL_STATUS_LABELS: Record<string, string> = {
@@ -167,6 +223,8 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   get_residents_by_floor: "Checking floor roster...",
   get_treasury_status: "Checking treasury...",
   report_floor_issue: "Creating maintenance report...",
+  get_wallet_balance: "Checking Solana wallet...",
+  execute_solana_transfer: "Executing on-chain transfer...",
 };
 
 async function getLiveContext(): Promise<string> {
@@ -239,6 +297,19 @@ function validateToolArgs(name: string, args: Record<string, unknown>): { valid:
       }
       if (!args.description || typeof args.description !== "string") {
         return { valid: false, error: "Missing required parameter: description (string)" };
+      }
+      return { valid: true };
+    case "get_wallet_balance":
+      if (!args.wallet_address || typeof args.wallet_address !== "string") {
+        return { valid: false, error: "Missing required parameter: wallet_address (string)" };
+      }
+      return { valid: true };
+    case "execute_solana_transfer":
+      if (!args.recipient_wallet || typeof args.recipient_wallet !== "string") {
+        return { valid: false, error: "Missing required parameter: recipient_wallet (string)" };
+      }
+      if (args.amount_sol === undefined || typeof args.amount_sol !== "number") {
+        return { valid: false, error: "Missing required parameter: amount_sol (number)" };
       }
       return { valid: true };
     default:
@@ -416,6 +487,83 @@ async function executeToolCall(name: string, args: Record<string, unknown>): Pro
           urgency,
           message: `Maintenance bounty #${bounty.id} created for floor ${floor}.`,
         });
+      }
+
+      case "get_wallet_balance": {
+        const address = args.wallet_address as string;
+        if (!address || typeof address !== "string") {
+          return JSON.stringify({ error: "Missing wallet_address parameter." });
+        }
+        try {
+          const balance = await getSolBalance(address);
+          const explorerUrl = explorerAddressUrl(address);
+          const towerAddress = getTowerPublicKey();
+          const isTowerWallet = towerAddress === address;
+          return JSON.stringify({
+            wallet: address,
+            balance_sol: balance,
+            network: SOLANA_NETWORK,
+            is_tower_wallet: isTowerWallet,
+            explorer_url: explorerUrl,
+          });
+        } catch (e: any) {
+          return JSON.stringify({ error: `Failed to fetch balance: ${e?.message ?? "unknown error"}. Is this a valid Solana address?` });
+        }
+      }
+
+      case "execute_solana_transfer": {
+        const recipient = args.recipient_wallet as string;
+        const amount = args.amount_sol as number;
+        const reason = (args.reason as string) ?? "Tower AI bounty payout";
+
+        if (!recipient || typeof recipient !== "string") {
+          return JSON.stringify({ error: "Missing recipient_wallet parameter." });
+        }
+        if (!amount || typeof amount !== "number" || amount <= 0) {
+          return JSON.stringify({ error: "Invalid amount_sol — must be a positive number." });
+        }
+        if (amount > 1) {
+          return JSON.stringify({ error: "Transfer blocked: maximum single transfer is 1 SOL on devnet." });
+        }
+
+        const towerKeypair = getTowerKeypair();
+        if (!towerKeypair) {
+          return JSON.stringify({ error: "Tower Solana wallet not configured. Contact a floor manager." });
+        }
+
+        const senderBalance = await getSolBalance(towerKeypair.publicKey.toBase58());
+        if (senderBalance < amount + 0.001) {
+          return JSON.stringify({
+            error: `Tower wallet has insufficient SOL. Current balance: ${senderBalance.toFixed(4)} SOL, needed: ${(amount + 0.001).toFixed(4)} SOL (including fees). Please top up the Tower wallet at ${explorerAddressUrl(towerKeypair.publicKey.toBase58())}.`,
+          });
+        }
+
+        try {
+          const signature = await transferSol(towerKeypair, recipient, amount);
+          const txUrl = explorerTxUrl(signature);
+
+          await db.insert(transactionsTable).values({
+            type: "payout",
+            amount: String(amount),
+            token: "SOL",
+            toWallet: recipient,
+            fromWallet: towerKeypair.publicKey.toBase58(),
+            txSignature: signature,
+            description: `On-chain payout: ${reason}`,
+          });
+
+          return JSON.stringify({
+            success: true,
+            signature,
+            amount_sol: amount,
+            recipient,
+            network: SOLANA_NETWORK,
+            explorer_url: txUrl,
+            message: `Successfully sent ${amount} SOL to ${recipient.slice(0, 8)}... on Solana ${SOLANA_NETWORK}. Transaction: ${signature.slice(0, 16)}...`,
+          });
+        } catch (e: any) {
+          return JSON.stringify({ error: `Transfer failed: ${e?.message ?? "unknown error"}` });
+        }
       }
 
       default:
