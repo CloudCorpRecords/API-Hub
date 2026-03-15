@@ -1,14 +1,54 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useTreasuryOverview, useTransactions, useTowerWallet } from '@/hooks/use-treasury';
 import { CyberCard } from '@/components/CyberCard';
 import { format, subDays, startOfDay } from 'date-fns';
-import { ArrowRightLeft, ArrowDownToLine, ArrowUpFromLine, Lock, Unlock, ExternalLink, Wallet, Zap } from 'lucide-react';
+import { ArrowRightLeft, ArrowDownToLine, ArrowUpFromLine, Lock, Unlock, ExternalLink, Wallet, Zap, Droplets } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
+import { useQueryClient } from '@tanstack/react-query';
+
+const DEVNET_RPC = "https://api.devnet.solana.com";
+const TOWER_ADDRESS = "BG2YdWeTMYFHNxkUBtTemrSuqHpwL5MqG27qF85jtHVp";
+const AIRDROP_LAMPORTS = 1_000_000_000;
 
 export default function Treasury() {
   const { data: overview, isLoading: overviewLoading } = useTreasuryOverview();
   const { data: transactions, isLoading: txLoading } = useTransactions(100);
   const { data: towerWallet, isLoading: walletLoading, error: walletError } = useTowerWallet();
+  const queryClient = useQueryClient();
+
+  const [airdropStatus, setAirdropStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [airdropMsg, setAirdropMsg] = useState('');
+
+  const requestDevnetAirdrop = useCallback(async () => {
+    setAirdropStatus('loading');
+    setAirdropMsg('');
+    try {
+      const res = await fetch(DEVNET_RPC, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'requestAirdrop',
+          params: [TOWER_ADDRESS, AIRDROP_LAMPORTS],
+        }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        setAirdropStatus('error');
+        setAirdropMsg(data.error.message?.includes('429') || data.error.code === 429
+          ? 'Rate limited — visit faucet.solana.com to fund manually.'
+          : data.error.message ?? 'Airdrop failed.');
+      } else {
+        setAirdropStatus('success');
+        setAirdropMsg(`Airdrop confirmed! Sig: ${String(data.result).slice(0, 20)}...`);
+        setTimeout(() => queryClient.invalidateQueries({ queryKey: ['tower-wallet'] }), 3000);
+      }
+    } catch (e: any) {
+      setAirdropStatus('error');
+      setAirdropMsg(e.message ?? 'Network error.');
+    }
+  }, [queryClient]);
 
   const getIconForType = (type: string) => {
     switch(type) {
@@ -184,15 +224,45 @@ export default function Treasury() {
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Address</p>
                   <p className="font-mono text-[10px] text-primary/80 break-all">{towerWallet.address}</p>
                 </div>
-                <a
-                  href={towerWallet.explorerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-[10px] text-accent hover:text-accent/80 transition-colors mt-1"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  View on Solana Explorer
-                </a>
+                <div className="flex flex-col gap-1.5 pt-1">
+                  <a
+                    href={towerWallet.explorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] text-accent hover:text-accent/80 transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    View on Solana Explorer
+                  </a>
+                  {towerWallet.balanceSol === 0 && (
+                    <div className="mt-1">
+                      <button
+                        onClick={requestDevnetAirdrop}
+                        disabled={airdropStatus === 'loading' || airdropStatus === 'success'}
+                        className="flex items-center gap-1.5 text-[10px] font-display uppercase tracking-wider px-2 py-1.5 border border-accent/40 text-accent hover:bg-accent/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full justify-center"
+                      >
+                        <Droplets className="w-3 h-3" />
+                        {airdropStatus === 'loading' ? 'Requesting...' : 'Request Devnet SOL'}
+                      </button>
+                      {airdropMsg && (
+                        <p className={`text-[9px] mt-1 leading-tight ${airdropStatus === 'success' ? 'text-accent' : 'text-muted-foreground'}`}>
+                          {airdropMsg}
+                        </p>
+                      )}
+                      {airdropStatus === 'error' && (
+                        <a
+                          href={`https://faucet.solana.com/?address=${towerWallet.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-[9px] text-primary/70 hover:text-primary mt-1 transition-colors"
+                        >
+                          <ExternalLink className="w-2.5 h-2.5" />
+                          Open faucet.solana.com
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             ) : null}
           </CyberCard>
