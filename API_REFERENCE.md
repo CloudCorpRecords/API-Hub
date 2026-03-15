@@ -9,6 +9,9 @@ All endpoints are prefixed with `/api`. Responses are JSON unless noted otherwis
 ## Table of Contents
 
 - [Authentication](#authentication)
+- [Mobile Auth Quick Start](#mobile-auth-quick-start)
+- [Protected vs Public Endpoints](#protected-vs-public-endpoints)
+- [My Profile (`/me`)](#my-profile)
 - [Bounties](#bounties)
 - [Residents](#residents)
 - [Treasury](#treasury)
@@ -21,128 +24,228 @@ All endpoints are prefixed with `/api`. Responses are JSON unless noted otherwis
 
 ## Authentication
 
-Frontier Road uses Replit OIDC (OpenID Connect with PKCE). Browser sessions are stored server-side. Mobile clients exchange an auth code for a session token.
+Frontier Road uses **Replit OIDC (OpenID Connect with PKCE)** for authentication. There are two session models:
 
-### Get current user
+| Client type | How it works |
+|-------------|--------------|
+| **Browser** | Server sets a `sid` cookie after login. Sent automatically. |
+| **Mobile** | App performs PKCE login, then calls `/api/mobile-auth/token-exchange` to get a session token. Pass it as `Authorization: Bearer <token>` on every request. |
+
+There is **no separate static API key**. The session token returned from the token exchange endpoint IS the credential for your mobile app. Treat it like a password — store it securely (e.g. iOS Keychain, Android Keystore) and never log or expose it.
+
+---
+
+## Mobile Auth Quick Start
+
+This is the complete flow for a mobile app to authenticate and make protected API calls.
+
+### Step 1 — Initiate PKCE login
+
+Your mobile app opens the Replit OIDC authorization URL in a browser/webview. Generate a PKCE code verifier and challenge before redirecting:
 
 ```
-GET https://towerroad.replit.app/api/auth/user
+GET https://replit.com/oidc/authorize
+  ?response_type=code
+  &client_id=<YOUR_REPL_ID>
+  &redirect_uri=myapp://auth/callback
+  &scope=openid email profile offline_access
+  &code_challenge=<sha256_base64url(code_verifier)>
+  &code_challenge_method=S256
+  &state=<random_state>
+  &nonce=<random_nonce>
 ```
 
-Returns the currently authenticated user, or `null` if not logged in.
+### Step 2 — Exchange the code for a session token
 
-**Headers (optional):**
+After the user logs in, Replit redirects to your `redirect_uri` with a `code` parameter. Exchange it immediately:
 
-| Header | Description |
-|--------|-------------|
-| `Authorization` | `Bearer <session_token>` — for mobile clients |
-| `Cookie: sid=<sid>` | Browser session cookie |
+```
+POST https://towerroad.replit.app/api/mobile-auth/token-exchange
+Content-Type: application/json
+```
+
+```json
+{
+  "code": "<code from redirect>",
+  "code_verifier": "<your PKCE verifier>",
+  "redirect_uri": "myapp://auth/callback",
+  "state": "<state you generated>",
+  "nonce": "<nonce you generated>"
+}
+```
+
+**Response 200:**
+
+```json
+{ "token": "a3f9b2c1d4e5f6..." }
+```
+
+**Save this token.** It is your Bearer credential for all protected API calls. It expires after 7 days and is invalidated on logout.
+
+### Step 3 — Use the token on every protected request
+
+```
+Authorization: Bearer a3f9b2c1d4e5f6...
+```
+
+Example:
+
+```
+POST https://towerroad.replit.app/api/bounties
+Authorization: Bearer a3f9b2c1d4e5f6...
+Content-Type: application/json
+
+{ "title": "Fix the sink", "description": "...", "rewardAmount": 50, "category": "MAINTENANCE" }
+```
+
+### Step 4 — Logout
+
+```
+POST https://towerroad.replit.app/api/mobile-auth/logout
+Authorization: Bearer a3f9b2c1d4e5f6...
+```
+
+**Response 200:** `{ "success": true }`
+
+This invalidates the token server-side immediately.
+
+---
+
+## Protected vs Public Endpoints
+
+| Endpoint | Auth required? |
+|----------|---------------|
+| `GET /bounties` | No |
+| `GET /bounties/:id` | No |
+| `POST /bounties` | **Yes** |
+| `POST /bounties/:id/claim` | **Yes** |
+| `POST /bounties/:id/complete` | **Yes** |
+| `POST /bounties/:id/cancel` | **Yes** |
+| `GET /residents` | No |
+| `GET /residents/:id` | No |
+| `POST /residents` | **Yes** |
+| `PATCH /residents/:id` | **Yes** (owner only) |
+| `GET /treasury` | No |
+| `GET /treasury/transactions` | No |
+| `GET /me` | **Yes** |
+| `PATCH /me` | **Yes** |
+| `POST /me/link-resident/:id` | **Yes** |
+| `GET /openai/conversations` | No |
+| `GET /openai/conversations/:id` | No |
+| `POST /openai/conversations` | **Yes** |
+| `POST /openai/conversations/:id/messages` | **Yes** |
+| `DELETE /openai/conversations/:id` | No |
+| `GET /healthz` | No |
+
+Unauthenticated calls to protected endpoints return **401**. Calling a protected endpoint as the wrong owner returns **403**.
+
+---
+
+## My Profile
+
+The `/me` endpoints always operate on the currently authenticated user. This is the recommended way for a mobile app to read and edit the logged-in user's own profile.
+
+### Get my profile
+
+```
+GET https://towerroad.replit.app/api/me
+Authorization: Bearer <token>
+```
+
+Returns the authenticated user's identity merged with their linked resident profile. `resident` is `null` if no resident profile has been linked yet (this should not happen after first login, since a stub is auto-created).
 
 **Response 200:**
 
 ```json
 {
   "user": {
-    "id": "abc123",
+    "id": "replit_user_id_abc",
     "email": "alex@example.com",
     "firstName": "Alex",
     "lastName": "Chen",
-    "profileImageUrl": "https://..."
+    "profileImageUrl": "https://cdn.replit.com/..."
+  },
+  "resident": {
+    "id": 3,
+    "name": "Alex Chen",
+    "walletAddress": null,
+    "avatar": "https://cdn.replit.com/...",
+    "skills": ["Rust", "TypeScript"],
+    "floor": 2,
+    "status": "online",
+    "bio": "Building the agent economy.",
+    "bountiesCompleted": 4,
+    "bountiesCreated": 2,
+    "totalEarned": 320.5,
+    "userId": "replit_user_id_abc",
+    "linkedAt": "2026-03-15T10:00:00.000Z",
+    "createdAt": "2026-03-15T10:00:00.000Z"
   }
 }
 ```
 
-```json
-{ "user": null }
-```
+**Response 401:** Not authenticated.
 
 ---
 
-### Browser login
+### Update my profile
 
 ```
-GET https://towerroad.replit.app/api/login?returnTo=/dashboard
+PATCH https://towerroad.replit.app/api/me
+Authorization: Bearer <token>
+Content-Type: application/json
 ```
 
-Redirects the browser to the Replit OIDC authorization endpoint. On success, redirects back to `returnTo` (defaults to `/`).
-
-| Query Param | Type | Description |
-|-------------|------|-------------|
-| `returnTo` | string | Optional. Relative path to redirect after login (must start with `/`). |
-
----
-
-### Browser logout
-
-```
-GET https://towerroad.replit.app/api/logout
-```
-
-Clears the server session and redirects to the OIDC provider logout URL.
-
----
-
-### Mobile — exchange auth code for token
-
-```
-POST https://towerroad.replit.app/api/mobile-auth/token-exchange
-```
-
-Exchange a PKCE authorization code for an opaque session token. Use this token in the `Authorization: Bearer <token>` header for all subsequent mobile API calls.
+Updates the authenticated user's resident profile. All fields are optional.
 
 **Request body:**
 
 ```json
 {
-  "code": "...",
-  "code_verifier": "...",
-  "redirect_uri": "myapp://auth/callback",
-  "state": "...",
-  "nonce": "..."
+  "name": "Alex Chen",
+  "bio": "Full-stack blockchain dev.",
+  "skills": ["Rust", "TypeScript", "Solidity"],
+  "floor": 3,
+  "status": "busy",
+  "walletAddress": "8xGZabcd..."
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `code` | string | Yes | Authorization code from the OIDC redirect |
-| `code_verifier` | string | Yes | PKCE code verifier |
-| `redirect_uri` | string (URI) | Yes | Must match the URI used in the auth request |
-| `state` | string | Yes | State value from the auth request |
-| `nonce` | string | No | Nonce used during auth |
+| Field | Type | Options |
+|-------|------|---------|
+| `name` | string | — |
+| `bio` | string | — |
+| `skills` | string[] | — |
+| `floor` | integer | — |
+| `status` | string | `online`, `offline`, `busy` |
+| `walletAddress` | string | — |
 
-**Response 200:**
-
-```json
-{ "token": "sess_abc123xyz" }
-```
-
-**Error responses:** `400`, `401`, `500`
+**Response 200:** Updated [Resident](#resident) object.
+**Response 401:** Not authenticated.
+**Response 404:** No resident profile linked (rare).
 
 ---
 
-### Mobile — logout
+### Link an existing resident to my account
 
 ```
-POST https://towerroad.replit.app/api/mobile-auth/logout
+POST https://towerroad.replit.app/api/me/link-resident/{residentId}
+Authorization: Bearer <token>
 ```
 
-**Headers:**
+Links a seed/unlinked resident row to the authenticated user's account. Useful if a resident was created before you logged in for the first time. If your account already has a linked stub, the stub is unlinked automatically to make room.
 
-| Header | Description |
-|--------|-------------|
-| `Authorization` | `Bearer <session_token>` |
-
-**Response 200:**
-
-```json
-{ "success": true }
-```
+**Response 200:** Updated [Resident](#resident) object (now linked to your account).
+**Response 404:** Resident not found.
+**Response 409:** `{ "error": "This resident is already linked to another account" }`
 
 ---
 
 ## Bounties
 
-The bounty board is the core of Frontier Road. Residents post tasks with USDC rewards. Anyone can claim, complete, or cancel a bounty.
+The bounty board is the core of Frontier Road. Residents post tasks with USDC rewards.
+
+> **Note:** `creatorWallet` is set server-side from your authenticated user ID — you do not send it in the request. Same for `claimerWallet` on claim. This prevents spoofing.
 
 ### List bounties
 
@@ -166,7 +269,7 @@ GET https://towerroad.replit.app/api/bounties
     "rewardToken": "USDC",
     "status": "open",
     "category": "MAINTENANCE",
-    "creatorWallet": "abc123",
+    "creatorWallet": "replit_user_id_abc",
     "claimerWallet": null,
     "proofOfWork": null,
     "escrowTxSignature": null,
@@ -183,9 +286,13 @@ GET https://towerroad.replit.app/api/bounties
 
 ```
 POST https://towerroad.replit.app/api/bounties
+Authorization: Bearer <token>
+Content-Type: application/json
 ```
 
-Creating a bounty automatically records an `escrow_lock` transaction in the treasury ledger.
+Creating a bounty automatically records an `escrow_lock` transaction in the treasury ledger. The server sets `creatorWallet` from your session — do not include it in the request body.
+
+**Rate limit:** 5 per user per hour.
 
 **Request body:**
 
@@ -196,8 +303,7 @@ Creating a bounty automatically records an `escrow_lock` transaction in the trea
   "rewardAmount": 150,
   "rewardToken": "USDC",
   "category": "DEV",
-  "creatorWallet": "user_abc123",
-  "escrowTxSignature": "optional_tx_sig"
+  "escrowTxSignature": "optional_on_chain_tx_sig"
 }
 ```
 
@@ -208,10 +314,11 @@ Creating a bounty automatically records an `escrow_lock` transaction in the trea
 | `rewardAmount` | number | Yes | USDC reward amount |
 | `rewardToken` | string | No | Defaults to `USDC` |
 | `category` | string | Yes | `DEV`, `DESIGN`, `MAINTENANCE`, `COMMUNITY`, or `OTHER` |
-| `creatorWallet` | string | Yes | Creator's wallet address or user ID |
 | `escrowTxSignature` | string | No | On-chain escrow transaction signature |
 
-**Response 201:** Returns the created [Bounty](#bounty) object.
+**Response 201:** Created [Bounty](#bounty) object.
+**Response 401:** Not authenticated.
+**Response 429:** Rate limit exceeded.
 
 ---
 
@@ -230,23 +337,17 @@ GET https://towerroad.replit.app/api/bounties/{id}
 
 ```
 POST https://towerroad.replit.app/api/bounties/{id}/claim
+Authorization: Bearer <token>
 ```
 
-Marks the bounty as `claimed` and records a `bounty_claim` transaction. Only `open` bounties can be claimed.
+Marks the bounty as `claimed`. The server sets `claimerWallet` from your session — no request body needed. Only `open` bounties can be claimed. You cannot claim your own bounty.
 
-**Request body:**
-
-```json
-{ "claimerWallet": "user_xyz789" }
-```
-
-| Field | Type | Required |
-|-------|------|----------|
-| `claimerWallet` | string | Yes |
+**Rate limit:** 10 per user per hour.
 
 **Response 200:** Updated [Bounty](#bounty) object.
-**Response 404:** Not found.
+**Response 401:** Not authenticated.
 **Response 409:** `{ "error": "Bounty is not available for claiming" }`
+**Response 429:** Rate limit exceeded.
 
 ---
 
@@ -254,9 +355,11 @@ Marks the bounty as `claimed` and records a `bounty_claim` transaction. Only `op
 
 ```
 POST https://towerroad.replit.app/api/bounties/{id}/complete
+Authorization: Bearer <token>
+Content-Type: application/json
 ```
 
-Submits proof of work and marks the bounty as `completed`. Records a `payout` transaction. Only `claimed` bounties can be completed.
+Submits proof of work and marks the bounty as `completed`. Records a `payout` transaction. Only the user who claimed the bounty (`claimerWallet === your user ID`) can complete it.
 
 **Request body:**
 
@@ -273,7 +376,8 @@ Submits proof of work and marks the bounty as `completed`. Records a `payout` tr
 | `completionTxSignature` | string | No | On-chain payout transaction signature |
 
 **Response 200:** Updated [Bounty](#bounty) object.
-**Response 404:** Not found.
+**Response 401:** Not authenticated.
+**Response 403:** `{ "error": "Only the claimer can complete this bounty" }`
 **Response 409:** `{ "error": "Bounty must be claimed before completing" }`
 
 ---
@@ -282,19 +386,21 @@ Submits proof of work and marks the bounty as `completed`. Records a `payout` tr
 
 ```
 POST https://towerroad.replit.app/api/bounties/{id}/cancel
+Authorization: Bearer <token>
 ```
 
-Cancels the bounty and records a `refund` transaction. Cannot cancel a `completed` or already `cancelled` bounty.
+Cancels the bounty and records a `refund` transaction. Only the creator (`creatorWallet === your user ID`) can cancel. Cannot cancel a `completed` or already `cancelled` bounty.
 
 **Response 200:** Updated [Bounty](#bounty) object.
-**Response 404:** Not found.
+**Response 401:** Not authenticated.
+**Response 403:** `{ "error": "Only the creator can cancel this bounty" }`
 **Response 409:** `{ "error": "Cannot cancel a bounty that is already completed" }`
 
 ---
 
 ## Residents
 
-The resident hub stores community member profiles, skills, and stats.
+The resident hub stores community member profiles, skills, and stats. Residents with a linked Replit account show a **verified** flag (`userId` non-null).
 
 ### List residents
 
@@ -306,28 +412,7 @@ GET https://towerroad.replit.app/api/residents
 |-------------|------|-------------|
 | `skill` | string | Filter residents whose skills array contains this keyword (case-insensitive) |
 
-**Example:** `GET /api/residents?skill=Rust`
-
-**Response 200:**
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Alex Chen",
-    "walletAddress": "8xGZ...",
-    "avatar": null,
-    "skills": ["Rust", "Networking", "Linux"],
-    "floor": 3,
-    "status": "online",
-    "bio": "Infrastructure wizard. If it's broken, I can fix it.",
-    "bountiesCompleted": 4,
-    "bountiesCreated": 2,
-    "totalEarned": 320.5,
-    "createdAt": "2026-03-01T00:00:00.000Z"
-  }
-]
-```
+**Response 200:** Array of [Resident](#resident) objects.
 
 ---
 
@@ -335,7 +420,11 @@ GET https://towerroad.replit.app/api/residents
 
 ```
 POST https://towerroad.replit.app/api/residents
+Authorization: Bearer <token>
+Content-Type: application/json
 ```
+
+> For most mobile use cases, prefer `PATCH /me` to edit your own profile rather than creating a new resident row. This endpoint is for admin-level profile creation.
 
 **Request body:**
 
@@ -350,16 +439,8 @@ POST https://towerroad.replit.app/api/residents
 }
 ```
 
-| Field | Type | Required |
-|-------|------|----------|
-| `name` | string | Yes |
-| `skills` | string[] | Yes |
-| `walletAddress` | string | No |
-| `avatar` | string (URL) | No |
-| `floor` | integer | No |
-| `bio` | string | No |
-
 **Response 201:** Created [Resident](#resident) object.
+**Response 401:** Not authenticated.
 
 ---
 
@@ -378,37 +459,21 @@ GET https://towerroad.replit.app/api/residents/{id}
 
 ```
 PATCH https://towerroad.replit.app/api/residents/{id}
+Authorization: Bearer <token>
+Content-Type: application/json
 ```
 
-All fields are optional. Only provided fields are updated.
-
-**Request body:**
-
-```json
-{
-  "status": "busy",
-  "skills": ["Rust", "Networking", "Linux", "Kubernetes"],
-  "floor": 1
-}
-```
-
-| Field | Type | Options |
-|-------|------|---------|
-| `name` | string | — |
-| `walletAddress` | string | — |
-| `avatar` | string | — |
-| `skills` | string[] | — |
-| `floor` | integer | — |
-| `status` | string | `online`, `offline`, `busy` |
-| `bio` | string | — |
+Only the owner of the resident profile (i.e. the user whose `userId` matches this resident) can update it. To update your own profile, prefer `PATCH /me`.
 
 **Response 200:** Updated [Resident](#resident) object.
+**Response 401:** Not authenticated.
+**Response 403:** `{ "error": "You do not have permission to update this resident" }`
 
 ---
 
 ## Treasury
 
-The treasury tracks all USDC flows through the community — bounty escrow, payouts, refunds, and deposits.
+The treasury tracks all USDC flows — bounty escrow, payouts, refunds, and deposits. All treasury endpoints are public (read-only).
 
 ### Get treasury overview
 
@@ -428,14 +493,6 @@ GET https://towerroad.replit.app/api/treasury
 }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `totalBalance` | Total USDC deposited minus total paid out |
-| `pendingEscrow` | USDC currently locked in active bounty escrow |
-| `totalPaidOut` | Cumulative USDC paid to bounty completers |
-| `activeBounties` | Count of open + claimed bounties |
-| `completedBounties` | Count of completed bounties |
-
 ---
 
 ### List transactions
@@ -448,24 +505,7 @@ GET https://towerroad.replit.app/api/treasury/transactions
 |-------------|------|---------|-------------|
 | `limit` | integer | 20 | Max number of transactions to return (most recent first) |
 
-**Response 200:**
-
-```json
-[
-  {
-    "id": 42,
-    "type": "payout",
-    "amount": 75,
-    "token": "USDC",
-    "fromWallet": "creator_wallet_abc",
-    "toWallet": "claimer_wallet_xyz",
-    "bountyId": 7,
-    "txSignature": null,
-    "description": "Payout for completed bounty: Fix WiFi on Floor 3",
-    "createdAt": "2026-03-15T14:22:00.000Z"
-  }
-]
-```
+**Response 200:** Array of [Transaction](#transaction) objects.
 
 **Transaction types:**
 
@@ -473,7 +513,7 @@ GET https://towerroad.replit.app/api/treasury/transactions
 |------|-------------|
 | `deposit` | USDC added to the community treasury |
 | `escrow_lock` | USDC locked when a bounty is created |
-| `escrow_release` | Escrow released (manual) |
+| `escrow_release` | Escrow released manually |
 | `payout` | USDC paid to a bounty completer |
 | `refund` | Escrow returned when a bounty is cancelled |
 | `bounty_claim` | Recorded when a resident claims a bounty |
@@ -482,11 +522,13 @@ GET https://towerroad.replit.app/api/treasury/transactions
 
 ## Tower AI (Chat)
 
-Tower is the Frontier Road AI concierge. It has live access to the community database and can look up bounties, find residents by skill, check the treasury, and create maintenance reports. Responses stream over Server-Sent Events (SSE).
+Tower is the Frontier Road AI concierge. It has live access to the community database and can look up bounties, find residents by skill, check the treasury, and file maintenance reports. Responses stream over Server-Sent Events (SSE).
+
+Creating conversations and sending messages **requires authentication**.
 
 ### Tower's capabilities
 
-Tower can respond to natural language queries like:
+Tower responds to natural language like:
 
 - *"What bounties are open right now?"*
 - *"Who knows Rust on floor 3?"*
@@ -514,15 +556,16 @@ GET https://towerroad.replit.app/api/openai/conversations
 
 ```
 POST https://towerroad.replit.app/api/openai/conversations
+Authorization: Bearer <token>
+Content-Type: application/json
 ```
-
-**Request body:**
 
 ```json
 { "title": "My Session" }
 ```
 
 **Response 201:** [Conversation](#openaiconversation) object.
+**Response 401:** Not authenticated.
 
 ---
 
@@ -558,7 +601,7 @@ DELETE https://towerroad.replit.app/api/openai/conversations/{id}
 
 ---
 
-### List messages in a conversation
+### List messages
 
 ```
 GET https://towerroad.replit.app/api/openai/conversations/{id}/messages
@@ -572,10 +615,13 @@ GET https://towerroad.replit.app/api/openai/conversations/{id}/messages
 
 ```
 POST https://towerroad.replit.app/api/openai/conversations/{id}/messages
+Authorization: Bearer <token>
 Content-Type: application/json
 ```
 
-Sends a user message and streams Tower's response as Server-Sent Events. The user message is saved, then Tower queries any relevant tools (bounties, residents, treasury) before streaming its answer.
+**Rate limit:** 30 messages per user per 10 minutes.
+
+Sends a user message and streams Tower's response as Server-Sent Events. The user message is saved, Tower queries any relevant tools, then streams its answer token by token.
 
 **Request body:**
 
@@ -585,22 +631,22 @@ Sends a user message and streams Tower's response as Server-Sent Events. The use
 
 **Response:** `Content-Type: text/event-stream`
 
-The stream emits newline-delimited `data:` events. There are three event types:
+Three event types are emitted:
 
-**1. Tool status** — emitted while Tower is querying the database, before the answer:
+**1. Tool status** — while Tower queries the database:
 
 ```
 data: {"tool_status":"Querying bounty board...","tool_name":"list_bounties"}
 ```
 
-**2. Content chunk** — streamed text tokens of Tower's answer:
+**2. Content chunk** — streamed text tokens:
 
 ```
 data: {"content":"Here are the open bounties on floor 2:"}
 data: {"content":"\n\n1. **Broken Heater** — 50 USDC..."}
 ```
 
-**3. Done** — signals end of stream:
+**3. Done** — end of stream:
 
 ```
 data: {"done":true}
@@ -612,17 +658,36 @@ data: {"done":true}
 data: {"error":"AI service error"}
 ```
 
-**Example client (JavaScript):**
+**Mobile SSE example (Swift-style pseudocode):**
+
+```swift
+var request = URLRequest(url: URL(string: ".../conversations/1/messages")!)
+request.httpMethod = "POST"
+request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+request.httpBody = try! JSONSerialization.data(withJSONObject: ["content": "Who knows Rust?"])
+
+let (stream, _) = try await URLSession.shared.bytes(for: request)
+for try await line in stream.lines {
+    guard line.hasPrefix("data: ") else { continue }
+    let json = line.dropFirst(6)
+    let event = try! JSONDecoder().decode(TowerEvent.self, from: Data(json.utf8))
+    if event.done == true { break }
+    if let chunk = event.content { print(chunk, terminator: "") }
+}
+```
+
+**JavaScript example:**
 
 ```js
-const res = await fetch(
-  "https://towerroad.replit.app/api/openai/conversations/1/messages",
-  {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content: "Who knows networking?" })
-  }
-);
+const res = await fetch(".../conversations/1/messages", {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer ${token}`,
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ content: "Who knows networking?" })
+});
 
 const reader = res.body.getReader();
 const decoder = new TextDecoder();
@@ -631,11 +696,9 @@ let buffer = "";
 while (true) {
   const { value, done } = await reader.read();
   if (done) break;
-
   buffer += decoder.decode(value, { stream: true });
   const lines = buffer.split("\n\n");
   buffer = lines.pop() || "";
-
   for (const line of lines) {
     if (!line.startsWith("data: ")) continue;
     const event = JSON.parse(line.slice(6));
@@ -654,11 +717,7 @@ while (true) {
 GET https://towerroad.replit.app/api/healthz
 ```
 
-**Response 200:**
-
-```json
-{ "status": "ok" }
-```
+**Response 200:** `{ "status": "ok" }`
 
 ---
 
@@ -675,8 +734,8 @@ GET https://towerroad.replit.app/api/healthz
 | `rewardToken` | string | Always `USDC` |
 | `status` | string | `open`, `claimed`, `completed`, `cancelled` |
 | `category` | string | `DEV`, `DESIGN`, `MAINTENANCE`, `COMMUNITY`, `OTHER` |
-| `creatorWallet` | string | Creator's wallet or user ID |
-| `claimerWallet` | string \| null | Claimer's wallet or user ID |
+| `creatorWallet` | string | Creator's user ID (set server-side from auth session) |
+| `claimerWallet` | string \| null | Claimer's user ID (set server-side on claim) |
 | `proofOfWork` | string \| null | Submitted proof URL |
 | `escrowTxSignature` | string \| null | On-chain escrow tx |
 | `completionTxSignature` | string \| null | On-chain payout tx |
@@ -698,6 +757,8 @@ GET https://towerroad.replit.app/api/healthz
 | `bountiesCompleted` | integer | Bounties completed |
 | `bountiesCreated` | integer | Bounties posted |
 | `totalEarned` | number | Total USDC earned |
+| `userId` | string \| null | Linked Replit user ID (`null` = unverified seed profile) |
+| `linkedAt` | ISO 8601 \| null | When the account was linked |
 | `createdAt` | ISO 8601 | Profile creation timestamp |
 
 ### Transaction
@@ -708,8 +769,8 @@ GET https://towerroad.replit.app/api/healthz
 | `type` | string | `deposit`, `escrow_lock`, `escrow_release`, `payout`, `refund`, `bounty_claim` |
 | `amount` | number | USDC amount |
 | `token` | string | Always `USDC` |
-| `fromWallet` | string \| null | Sender wallet |
-| `toWallet` | string \| null | Recipient wallet |
+| `fromWallet` | string \| null | Sender user ID |
+| `toWallet` | string \| null | Recipient user ID |
 | `bountyId` | integer \| null | Associated bounty |
 | `txSignature` | string \| null | On-chain transaction signature |
 | `description` | string | Human-readable description |
@@ -746,7 +807,9 @@ All errors return a JSON body with an `error` field:
 | Status | Meaning |
 |--------|---------|
 | `400` | Bad request — missing or invalid fields |
-| `401` | Unauthorized — invalid or missing session |
+| `401` | Unauthorized — missing or expired session token. Include `Authorization: Bearer <token>` header. |
+| `403` | Forbidden — authenticated but not the owner of this resource |
 | `404` | Resource not found |
 | `409` | Conflict — invalid state transition (e.g. claiming an already-claimed bounty) |
+| `429` | Rate limit exceeded — slow down and retry after a short wait |
 | `500` | Server error |
