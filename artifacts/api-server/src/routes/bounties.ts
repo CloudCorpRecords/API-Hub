@@ -101,6 +101,15 @@ router.post("/bounties/:id/claim", async (req, res) => {
     .where(eq(bountiesTable.id, id))
     .returning();
 
+  await db.insert(transactionsTable).values({
+    type: "bounty_claim",
+    amount: bounty.rewardAmount,
+    token: bounty.rewardToken,
+    fromWallet: parsed.data.claimerWallet,
+    bountyId: bounty.id,
+    description: `Bounty claimed: ${bounty.title}`,
+  });
+
   res.json({ ...updated, rewardAmount: Number(updated.rewardAmount) });
 });
 

@@ -16,6 +16,7 @@ const EVENT_COLORS: Record<string, string> = {
   deposit: 'text-green-400',
   refund: 'text-orange-400',
   escrow_release: 'text-primary',
+  bounty_claim: 'text-primary',
 };
 
 const EVENT_LABELS: Record<string, string> = {
@@ -24,6 +25,7 @@ const EVENT_LABELS: Record<string, string> = {
   deposit: 'DEPOSIT',
   refund: 'REFUND',
   escrow_release: 'ESCROW_RELEASED',
+  bounty_claim: 'BOUNTY_CLAIMED',
 };
 
 export default function Dashboard() {
