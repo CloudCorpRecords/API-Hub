@@ -1,5 +1,124 @@
 # Frontier Road — Community OS + Bounty Platform
 
+---
+
+## Hackathon Track Qualifications
+
+### Tracks We Clearly Qualify For
+
+---
+
+#### 1. 🧠 Agentic Funding & Coordination: Frontier Tower Agent — $500 (PERFECT FIT)
+**Sponsor:** Frontier Tower · **Prize:** $500 USD + runner-up: 1-year membership
+
+This track literally describes what Frontier Road is. Frontier Tower is a 16-floor SF innovation hub that wanted an agent residents actually talk to — one that surfaces needs, routes bounties, and helps coordinate the building.
+
+| Challenge Problem | What We Built |
+|---|---|
+| Conversational agent residents talk to | Tower AI (GPT-4o, SSE streaming, 10 live tools) |
+| Cross-floor resource matching | Skill-based resident search + `find_residents_by_skill` tool |
+| Bounty routing + autonomous allocation | Full bounty marketplace with USDC escrow, claim/complete flow |
+| Floor issue reporting | `report_floor_issue` Tower tool → creates MAINTENANCE bounty |
+| Governance interface | Treasury page with real transaction ledger + floor allocation tracking |
+| Live picture of what's happening | Dashboard with per-floor resident/issue indicators + system log |
+| Onboarding new members | Auto-created resident profile on first login, complete-profile banner |
+
+**Submission strength:** Every bullet point in the challenge description maps to a shipped feature.
+
+---
+
+#### 2. 🧠 Agentic Funding & Coordination (Solana) — $1,200 (STRONG FIT)
+**Sponsor:** Solana · **Prize:** $1,200 winner / $800 runner-up
+
+The track wants agents that *take action* — vote on proposals, move funds, evaluate work, pay for services. Tower does all of this on Solana devnet.
+
+| Requirement | Evidence |
+|---|---|
+| Agents that take action (not just dashboards) | Tower executes real SOL transfers on devnet via `execute_solana_transfer` |
+| Move funds programmatically | Bounty escrow: USDC rewards locked/released on claim/complete; SOL payouts from Tower wallet |
+| Coordinate resources between agents and humans | 10 Tower tools: bounties, residents, treasury, floor issues, wallet queries |
+| Preferred stack: Solana + agentic frameworks | `@solana/web3.js`, devnet wallet `BG2YdWeTMYFHNxkUBtTemrSuqHpwL5MqG27qF85jtHVp`, 0.5 SOL funded |
+| Explain reasoning | Tower streams reasoning via SSE with inline tool-call status indicators |
+
+**What stands out:** Tower's `execute_solana_transfer` tool signs and broadcasts a *real* on-chain transaction, saves the tx signature to the DB ledger, and streams the result back — not a simulation.
+
+---
+
+#### 3. 🌐 Sovereign Infrastructure by Bittensor — $1,500 (MODERATE FIT)
+**Sponsor:** Bittensor · **Prize:** $1,500 new project / $1,000 meaningful advancement
+
+**Requirement:** "Must touch some part of the Bittensor stack."
+
+| Requirement | Evidence |
+|---|---|
+| Touch Bittensor stack | TAO wallet via `@polkadot/keyring` (sr25519 keypair); balance query via taostats.io REST API; Bittensor AI inference via Chutes.ai (Subnet 64) |
+| Agent identity without centralized registry | Tower's Bittensor wallet (`5Fxx8eF9eay7EzJF463of5UfR8eWoaVaVuFjxFs6JDc1yTtV`) is an sr25519 keypair derived from a BIP39 mnemonic — no OAuth, no login, cryptographically sovereign |
+| Something meaningful works without a trusted third party | `query_bittensor_subnet` tool routes inference to Bittensor Subnet 64 (Chutes.ai) — if OpenAI is rate-limited or censors content, this path is independent |
+| Threat model | Centralized AI providers (OpenAI) can throttle, censor, or shut down. Frontier Road's Bittensor integration provides a decentralized inference fallback and a TAO-denominated payment rail for community bounties |
+
+**Honest limitations:** Main Tower logic still runs on OpenAI (gpt-4o). The Bittensor integration is a real but partial sovereignty layer — not a fully decentralized system. Submit as "meaningful advancement" framing or a hybrid architecture story.
+
+---
+
+### Tracks We Could Enter With Additional Work
+
+---
+
+#### 4. 🧠 Agentic Funding & Coordination: Metaplex Onchain Agent — $5,000 (HIGH VALUE)
+**Sponsor:** Metaplex · **Prize:** $5,000 USD
+
+**Base requirement:** Register Tower as an agent on the Metaplex Agent Registry (gives Tower an onchain Solana identity + x402-compatible API for receiving crypto payments).
+
+What we'd need to add:
+- Register Tower's Solana wallet (`BG2YdWeTMYFHNxkUBtTemrSuqHpwL5MqG27qF85jtHVp`) via Metaplex Agent Docs
+- Expose Tower's bounty/concierge endpoint as an x402-payable HTTP API
+- Optional: launch a community token via Tower's agent wallet
+
+This is realistic work (1–3 hours) and the prize is $5,000. Highest ROI of all tracks if pursued.
+
+---
+
+#### 5. 🖥️ BONUS: The ElevenLabs Voice Challenge (POSSIBLE)
+**Sponsor:** ElevenLabs · **Prize:** 3–6 months Pro per team member
+
+Add voice to Tower AI: user speaks to Tower, Tower speaks back using ElevenLabs TTS. Tower's streaming SSE architecture already supports real-time output — adding voice would be a natural fit for the "agent that feels alive" criterion.
+
+---
+
+#### 6. 🌸 BONUS: Made by Human by human.tech — $1,200 (POSSIBLE)
+**Sponsor:** human.tech · **Prize:** $1,200 (new project)
+
+Requires registering at `frontier.human.tech` and integrating Human Passport (sybil-resistant identity). Frontier Road already has auth and resident identity — adding Passport as a verification layer for bounty participants would qualify. Community coordination + public goods funding aligns with their Covenant principles.
+
+---
+
+### Tracks That Don't Fit
+
+| Track | Why Not |
+|---|---|
+| 🤖 Physical AI & Robotics (NomadicML) | Requires real hardware: robots, drones, embedded systems |
+| 🤖 Physical AI: Data at Scale (Deep Lake) | Must use Deep Lake GPU-native database as core data layer |
+| 🧠 Meteora Challenge | DeFi LP strategy on Solana AMM pools — different domain |
+| 🧠 Unbrowse Challenge | Must use Unbrowse as the data/action layer |
+| 🧠 Arkhai Agentic Commerce | Must integrate Alkahest conditional escrow contracts (EVM/EAS) |
+| 🧠 Lit Protocol Challenge | Must use Lit's signing, encryption, and TEE compute |
+| 🛡️ AI Safety & Evaluation | Red-teaming / evaluation harnesses — different domain |
+| 🛡️ Kalibr Resilience Challenge | Requires Kalibr SDK instrumentation (2-line add, but marginal fit) |
+| 🌐 Sovereign Infra: Bittensor Subnet Design | Requires full subnet spec: miners, validators, incentive mechanism design |
+
+---
+
+### Recommended Submission Strategy
+
+**Submit to all three strong tracks** — they're not mutually exclusive:
+1. **Frontier Tower Agent** — tell the building story; this is the most human/narrative track
+2. **Agentic Funding & Coordination (Solana)** — emphasize on-chain action: real SOL transfers, escrow mechanics, Tower as economic agent
+3. **Sovereign Infrastructure (Bittensor)** — lead with the sr25519 wallet identity + Subnet 64 AI gateway + TAO payment rail; be honest about current limitations
+
+**Pursue Metaplex if time allows** — $5,000 prize, and registration is a few API calls on top of what already exists.
+
+---
+
 ## Overview
 
 **Frontier Road** is a full-stack web application that serves as the operating system for a co-living/hacker space community with an integrated bounty marketplace. Residents can post tasks with Solana USDC rewards, claim and complete bounties, coordinate resources, match skills, and chat with an AI concierge ("Tower").

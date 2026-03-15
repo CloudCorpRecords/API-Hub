@@ -1,0 +1,1784 @@
+🤖 Physical AI & Robotics by NomadicML
+Sponsored by:
+NomadicML
+NomadicML
+Challenge Overview
+Deploy AI models that interact with the physical world—robots, drones, embedded systems, and real hardware. The focus isn't simulation: we want working embodied systems that perceive, reason, and act under real-world constraints like latency, safety, and uncertainty.
+
+
+
+Requirements
+
+State whether your project is a new build or a meaningful advancement of an existing project
+Preferred stack: VLMs/VLAs, on-device or edge inference, robotics frameworks (ROS, custom control stacks, embedded pipelines), real hardware platforms (robot arms, mobile robots, humanoid systems)
+
+
+Submission requirements
+
+Public GitHub repository
+
+Live demo (will happen post-submission to judges)
+
+Documentation describing system architecture
+
+Hardware verification (photos or video of the robot in operation)
+
+Evaluation metrics or task benchmarks demonstrating real-world performance
+
+
+
+This track is sponsored by NomadicML.
+
+Example Project Ideas
+Fine-tuned Physical AI models for decentralized intelligence in agriculture, education, health, or accessibility
+Dexterity and manipulation systems: inserting objects, pressing buttons, pouring liquids, tool usage
+Vision-Language-Action (VLA) pipelines where robots interpret instructions and execute tasks autonomously
+Multi-model systems combining perception, reasoning, and robot control policies
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Completeness/Functionality
+Is the product finished and fully functional? Or is it just a prototype with broken elements?
+
+Judges
+View all VIPs
+Harsh Sharma
+Harsh Sharma
+Kedar Karpe
+Kedar Karpe
+Andrew Zbytek
+Andrew Zbytek
+Ali Shaikh
+Ali Shaikh
+Prizes
+View all prizes
+🏆
+
+New project winner
+
+NomadicML
+🤖 Physical AI & Robotics by NomadicML
+
+$1,200 USD
+
+$1,250 in compute credits from NomadicML
+
+🤖 Physical AI & Robotics by NomadicML
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+NomadicML
+View all requirements
+
+🏆
+
+Meaningful advancement of existing project
+
+NomadicML
+🤖 Physical AI & Robotics by NomadicML
+
+$800 USD
+
+$1,250 in compute credits from NomadicML
+
+🤖 Physical AI & Robotics by NomadicML
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+NomadicML
+View all requirements
+
+🏆
+
+Winners
+
+NomadicML
+🤖 Physical AI & Robotics by NomadicML
+
+Invitation to pitch at Hello Tomorrow Demo Day
+
+🤖 Physical AI & Robotics by NomadicML
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+NomadicML
+View all requirements
+
+🤖 Physical AI & Robotics: Data at Scale
+Sponsored by:
+Deep Lake
+Deep Lake
+Challenge Overview
+Robots generate terabytes of multimodal data every single day — video, sensor streams, point clouds, and telemetry. Storing, indexing, and retrieving that data is painfully expensive and slow, and the problem only grows as fleets scale and models demand larger training datasets. Deep Lake is a GPU-native database purpose-built for this challenge. It efficiently indexes and stores massive multimodal datasets, runs queries orders of magnitude faster than general-purpose solutions, and streams data directly into modern training pipelines for physical AI systems.
+
+
+
+The core challenge: build something that makes physical AI data workflows faster, cheaper, or smarter using Deep Lake.
+
+
+
+Projects should use Deep Lake as the core data layer for ingesting, querying, and streaming physical AI datasets. Teams might build a data pipeline for training robot models, a retrieval system for multimodal sensor logs, a dataset exploration tool for robotics research, or a real-time inference layer that pulls context from a Deep Lake dataset. Beyond Deep Lake, teams will likely work with tools such as PyTorch, Hugging Face Transformers, and similar ML frameworks. Strong projects should demonstrate a clear real-world physical AI use case, clean integration with Deep Lake, and a working demo that shows measurable improvements in speed, cost, or capability over naive data pipelines. Bonus points for creative approaches and for projects that push Deep Lake to operate at scale.
+
+Example Project Ideas
+Training vision-language-action models (VLAs) with multimodal robotics data stored and streamed through Deeplake
+Building persistent memory systems for long-horizon task planning in physical AI agents
+Novel approaches to ingesting, versioning, or querying large-scale sensor and embodiment datasets
+Tools or pipelines that reduce the cost and complexity of going from raw robot data to trained models
+Required Technologies
+deeplake
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+User Experience (UX)
+Is the product intuitive, accessible, and visually polished? Would a user understand how to use it quickly?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Judges
+View all VIPs
+Kamo Aghbalyan
+Kamo Aghbalyan
+Harsh Sharma
+Harsh Sharma
+Andrew Zbytek
+Andrew Zbytek
+Prizes
+View all prizes
+🏆
+
+Best overall use of Deeplake
+
+Deep Lake
+🤖 Physical AI & Robotics: Data at Scale
+
+$5,000 in credits
+
+🤖 Physical AI & Robotics: Data at Scale
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Required technologies
+
+deeplake
+
+Deep Lake
+View all requirements
+
+​🧠 Agentic Funding & Coordination
+Sponsored by:
+Solana
+Solana
+Challenge Overview
+This track is sponsored by Solana.
+
+
+
+Solana is the fastest and most used blockchain in the world — processing more transactions and generating more on-chain revenue than all other chains combined — and it’s becoming the settlement layer for every tradeable asset, from tokens to stocks, bonds, real estate, and private equity. The Solana developer community has grown 10x since 2020, making it the most vibrant and active developer community in crypto.
+
+
+
+Solana has also proven itself as a viable home for the agent economy and the latest advancements at the intersection of blockchain technology and AI.
+
+
+
+For this challenge, please explore how autonomous agents can coordinate resources, funding, and decision-making in a decentralized manner. As AI agents become more capable, new economic and governance systems become possible—and necessary. Build systems where funding, incentives, and coordination happen programmatically between agents and humans.
+
+
+
+Requirements
+
+State whether your project is a new build or a meaningful advancement of an existing project
+Preferred stack: Solana + agentic frameworks.
+Projects should demonstrate meaningful agent autonomy and coordination mechanisms
+Creative and experimental approaches encouraged
+
+
+Submission Requirements
+
+Public GitHub repository (multiple repos ok)
+Live demo (will happen post-submission to judges)
+Detailed README covering architecture, how the system works, why it's relevant, and links to any public slides
+
+
+What Stands Out
+
+Projects that go beyond dashboards and chatbots. We want agents that take action: vote on proposals, move funds, evaluate work, pay for services, and coordinate with other agents. Bonus for agents who explain their reasoning. Projects combining x402 payments with multi-agent coordination are especially interesting — the newest frontier, least tooling, most design space.
+
+
+
+Developer Guides / Toolkits
+
+Solana AI ecosystem: solana.com/ai 
+Intro to AI on Solana: solana.com/developers/guides/getstarted/intro-to-ai 
+Intro to x402: solana.com/developers/guides/getstarted/intro-to-x402 
+Solana Agent Kit: github.com/sendaifun/solana-agent-kit (TypeScript) / github.com/sendaifun/solana-agent-kit-py (Python)
+Awesome Solana AI: github.com/solana-foundation/awesome-solana-ai
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Completeness/Functionality
+Is the product finished and fully functional? Or is it just a prototype with broken elements?
+
+Judges
+View all VIPs
+Aadil Ahmed
+Aadil Ahmed
+Glo Maldonado
+Glo Maldonado
+Prizes
+View all prizes
+🏆
+
+Winner
+
+Solana
+​🧠 Agentic Funding & Coordination
+
+$1,200 USD
+
+​🧠 Agentic Funding & Coordination
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Solana
+View all requirements
+
+🥈
+
+Runner-up
+
+Solana
+​🧠 Agentic Funding & Coordination
+
+$800 USD
+
+​🧠 Agentic Funding & Coordination
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Solana
+View all requirements
+
+🏆
+
+Winners
+
+Solana
+​🧠 Agentic Funding & Coordination
+
+Invitation to pitch at Hello Tomorrow Demo Day
+
+​🧠 Agentic Funding & Coordination
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Solana
+View all requirements
+
+​🧠 Agentic Funding & Coordination: Metaplex Onchain Agent
+Sponsored by:
+Metaplex
+Metaplex
+5000
+Total Prize Pool
+Challenge Overview
+Agents can unlock meaningful economic value, but they need blockchain rails to operate credibly and productively onchain. This starts with identity, reputation, and discoverability, and extends into the ability to coordinate, transact, and own assets. With Metaplex, developers can make agents legible, composable, and economically active participants on Solana.
+
+
+
+Technical Requirements / What Stands Out
+
+The base requirement for submission is agent registration using the Metaplex Agent Registry. Beyond that, projects that stand out will either demonstrate compelling agent-to-agent commerce applications using x402, or launch tokens that serve a compelling utility or community function.
+
+
+
+Builders will have access to developer support from the Metaplex devrel team throughout the build process and afterwards.
+
+
+
+Developer Guides / Toolkits
+
+Metaplex Agent Docs
+Register an Agent
+Run an Agent
+Launch a Token
+Example Project Ideas
+Connect an Agent to Solana
+
+Register an agent on Solana using Metaplex. This gives your agent an onchain wallet, identity, and the ability to expose an x402-compatible API so it can receive crypto payments for services. Connect your agent runtime and fund its wallet so it can begin transacting or deploying programs on Solana.
+
+
+
+Tokenize an Agent on Solana
+
+After registering and connecting your agent to Solana, use the agent wallet to launch a token with Metaplex — serving a compelling utility or community function.
+
+Required Technologies
+metaplex
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+User Experience (UX)
+Is the product intuitive, accessible, and visually polished? Would a user understand how to use it quickly?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Prizes
+View all prizes
+🏆
+
+Winner
+
+Metaplex
+​🧠 Agentic Funding & Coordination: Metaplex Onchain Agent
+
+$5,000 USD
+
+​🧠 Agentic Funding & Coordination: Metaplex Onchain Agent
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Required technologies
+
+metaplex
+
+Metaplex
+View all requirements
+
+​🧠 Agentic Funding & Coordination: Unbrowse Challenge
+Sponsored by:
+Unbrowse
+Unbrowse
+$2000
+Total Prize Pool
+Challenge Overview
+Agentic Funding and Coordination Track
+
+
+
+Most AI agents waste time and tokens fighting with headless browsers and HTML. Unbrowse gives agents a better primitive: direct API access to any website, 100x faster and 40x fewer tokens, leveraging your actual browser session for auth-protected content. Build agents that actually act — not just browse. Use Unbrowse to give your agent the ability to pull data from and take actions on any site, then combine that with autonomous decision-making to create something that operates independently.
+
+
+
+Example Project Directions:
+
+1. Autonomous Research Agent: An agent that continuously pulls data from any combination of sources (on-chain, news, social, financial platforms) and synthesizes actionable intelligence or executes decisions.
+
+2. Autonomous Micro-VC: Pulls investment data from DeFiLlama, Messari, Twitter, and research sources via Unbrowse, then autonomously allocates or recommends on-chain positions.
+
+3. Agentic Workflow Automator: An agent that logs into, monitors, and takes actions across multiple authenticated platforms on your behalf — without ever exposing credentials to a cloud proxy.
+
+4. Multi-Agent Coordination System: Agents that share discovered API endpoints via Unbrowse’s shared registry, collectively becoming smarter as they explore the web.
+
+
+
+Technical Requirements:
+
+∙ Required: Unbrowse must be used as the data/action layer (unbrowse.ai)
+
+∙ Strong submissions go beyond data retrieval — show autonomous decision-making and real execution
+
+∙ Bonus points: multi-agent coordination, on-chain integration
+
+Prizes
+View all prizes
+🏆
+
+Winner
+
+Unbrowse
+​🧠 Agentic Funding & Coordination: Unbrowse Challenge
+
+$1500
+
+​🧠 Agentic Funding & Coordination: Unbrowse Challenge
+
+Unbrowse
+View all requirements
+
+🏆
+
+Runner-up
+
+Unbrowse
+​🧠 Agentic Funding & Coordination: Unbrowse Challenge
+
+$500
+
+​🧠 Agentic Funding & Coordination: Unbrowse Challenge
+
+Unbrowse
+View all requirements
+
+​🧠 Agentic Funding & Coordination: Frontier Tower Agent
+Sponsored by:
+Frontier Tower
+Frontier Tower
+$500
+Total Prize Pool
+Challenge Overview
+Frontier Tower is a 16-floor innovation hub in central SF, home to 700+ members across AI, robotics, neurotech, biotech, arts, and the Ethereum Foundation's first permanent community hub on earth.
+
+
+
+During ETH Unblock, coordinated by the Ethereum Foundation, hackers built out the first prototypes for the Frontier Tower agent. See what was built for context and inspiration—link coming.
+
+
+
+The building wants an agent that learns from Frontier Tower's community, talks to it, and helps it coordinate. The conversational interface is the core. The Frontier Tower Agent should be something residents actually talk to—ask questions, surface needs, propose ideas, request resources. Beyond that, the design space is open.
+
+
+
+For context: during Intelligence at the Frontier, the building is running a live governance experiment with 8+ floors each governing their own floor treasuries. That activity is part of the real coordination landscape the agent would operate within.
+
+
+
+Some challenges the community has identified, if you're looking for a thread to pull:
+
+Onboarding — new members join floor-by-floor with no building-wide orientation or context
+Cross-floor resource matching — skills, space, equipment, and collaborators exist across the building but don't find each other
+Event coordination — setup, scheduling, and logistics are person-dependent and break when people are unavailable
+Bounty routing + autonomous allocation — tower-wide infrastructure work goes unfunded because there's no mechanism to scope and pay for it
+Governance interface — floor leads are making real allocation decisions; the agent could help surface priorities, track proposals, and log decisions
+Picture of the system — no one has a live view of what's happening across the building: events, foot traffic, resource usage, community activity
+
+
+Any of these is a valid build surface. So is something we haven't thought of. The building is the constraint—the agent should work for the humans who live and work in it.
+
+
+
+20% of profits from this event will flow into a new Frontier Tower community treasury. Help shape its future.
+
+Submission Requirements
+summary
+documentation
+github
+demo
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+User Experience (UX)
+Is the product intuitive, accessible, and visually polished? Would a user understand how to use it quickly?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Prizes
+View all prizes
+🥈
+
+Runner-Up
+
+Frontier Tower
+​🧠 Agentic Funding & Coordination: Frontier Tower Agent
+
+1 year of Frontier Tower membership
+
+​🧠 Agentic Funding & Coordination: Frontier Tower Agent
+
+Submission Requirements
+
+summary
+documentation
+github
+demo
+Frontier Tower
+View all requirements
+
+🏆
+
+Winner
+
+Frontier Tower
+​🧠 Agentic Funding & Coordination: Frontier Tower Agent
+
+$500 USD
+
+​🧠 Agentic Funding & Coordination: Frontier Tower Agent
+
+Submission Requirements
+
+summary
+documentation
+github
+demo
+Frontier Tower
+View all requirements
+
+​🧠 Agentic Funding & Coordination: Meteora Challenge
+Sponsored by:
+Meteora
+Meteora
+2000
+Total Prize Pool
+Challenge Overview
+Meteora is Solana's largest liquidity layer, processing $182.2B in cumulative volume with $1.31B in fees generated for LPs. Our DLMM (Dynamic Liquidity Market Maker) uses bin-based concentrated liquidity with dynamic fees that generated 1.62x more fees than standard AMMs last year.
+
+
+
+The challenge: LP strategy today is manual. Agents that can read pool state, analyze fee dynamics, rebalance positions, and execute strategies autonomously represent the next evolution of DeFi participation. We want builders to make LP intelligence agentic.
+
+
+
+Technical Requirements
+
+Preferred stack: Solana + Meteora SDKs (TypeScript, Rust, or Go). Docs at docs.meteora.ag, LLM-friendly spec at docs.meteora.ag/llms.txt
+
+
+
+APIs: DLMM API (30 RPS), DAMM v1/v2 API (10 RPS), Dynamic Vault API (unlimited), DBC SDK
+
+
+
+What Stands Out 
+
+Projects that go beyond read-only dashboards. We want agents that take action: execute swaps, manage positions, configure launches. Bonus for agents that explain their reasoning (not just black-box execution). Projects using the DBC (Dynamic Bonding Curve) SDK are especially interesting since it's our newest primitive with the least tooling.
+
+
+
+Developer Guides / Toolkits
+
+Meteora Docs: docs.meteora.ag
+LLM-friendly docs: docs.meteora.ag/llms.txt
+GitHub: github.com/MeteoraAg
+TypeScript SDK (all products), Rust SDK (DAMM v2, DBC, Dynamic Vault), Go SDK (DAMM v2, DBC)
+DLMM API Swagger docs
+DBC SDK with CLI for quick launches
+Example Project Ideas
+Autonomous LP Agent 
+
+An agent that monitors DLMM bin distributions, detects when positions drift out of range, and rebalances across bins to maximize fee capture. Uses Meteora's TypeScript SDK to read pool state and execute repositioning.
+
+
+
+Cross-Pool Arbitrage Intelligence 
+
+An agent that scans all Meteora pools (DLMM, DAMM v2, Dynamic Vaults) plus external DEXs, identifies fee/yield discrepancies, and recommends or executes capital reallocation across venues.
+
+
+
+LP Army Copilot 
+
+A conversational agent that helps new LPs understand pool dynamics, recommends bin strategies based on volatility regime, simulates expected fee income, and walks users through position entry using natural language.
+
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+User Experience (UX)
+Is the product intuitive, accessible, and visually polished? Would a user understand how to use it quickly?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Judges
+View all VIPs
+Shai Perednik
+Shai Perednik
+Prizes
+View all prizes
+🏆
+
+Winner
+
+Meteora
+​🧠 Agentic Funding & Coordination: Meteora Challenge
+
+$1,000 USD
+
+​🧠 Agentic Funding & Coordination: Meteora Challenge
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Meteora
+View all requirements
+
+🏆
+
+Runner-up #1
+
+Meteora
+​🧠 Agentic Funding & Coordination: Meteora Challenge
+
+$500 USD
+
+​🧠 Agentic Funding & Coordination: Meteora Challenge
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Meteora
+View all requirements
+
+🏆
+
+Runner-up #2
+
+Meteora
+​🧠 Agentic Funding & Coordination: Meteora Challenge
+
+$500 USD
+
+​🧠 Agentic Funding & Coordination: Meteora Challenge
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Meteora
+View all requirements
+
+​🧠 Agentic Funding & Coordination: Arkhai Agentic Commerce
+Sponsored by:
+Arkhai
+Arkhai
+1000
+Total Prize Pool
+Challenge Overview
+Arkhai builds infrastructure for agentic commerce—open markets where AI agents discover, negotiate, and settle transactions for compute, energy, and information without centralized intermediaries. The foundation is Alkahest, a general-purpose conditional escrow system on EAS built as a public good because nothing equivalent existed for EVM. Builders are invited to extend this ecosystem using any of Arkhai's tools: new conditional payment primitives, agent-native commerce applications, or novel integrations of existing tools like Git Commit Trading and Natural Language Agreements. The goal is to advance the frontier of trustless P2P exchange designed for a world where agents, not humans, are the primary economic actors.
+
+
+
+Technical Requirements 
+
+Projects must meaningfully integrate Arkhai's existing tooling. The strongest submissions will go beyond demos—we want working systems that extend the Alkahest ecosystem with novel arbiters, escrow logic, or fulfillment types. Bonus for projects that co-design escrow structure, fulfillment format, and arbitration logic end-to-end for a specific domain.
+
+
+
+Developer Guides / Toolkits
+
+Starter Packet: Installation & Ideas
+Protocol Docs
+Alkahest Docs MCP Server: npx alkahest-mcp
+Agent Skills: Available via Claude Code (/plugin marketplace add arkhai-io/claude-plugins) or ClawHub (clawhub install alkahest-developer). Raw SKILL.md files available in the docs/skills/ directory of each repo.
+Example Project Ideas
+Agentic Commerce Applications
+
+Markets where AI agents autonomously create, fulfill, and arbitrate escrows — agent-to-agent service exchange, autonomous compute procurement, self-managing data pipelines.
+
+
+
+Alkahest Ecosystem Extensions
+
+Solidity implementations of novel arbiters, escrow obligations, or fulfillment types—ZK proofs, oracle data, reputation signals, threshold quorums, or new asset and obligation patterns.
+
+
+
+NLA Domain Applications
+
+Full-stack builds that co-design escrow structure, fulfillment format, and arbitration logic for a specific domain (legal agreements, SLA enforcement, research deliverables).
+
+
+
+Decentralized Service Markets
+
+Open markets for compute, APIs, or data services with on-chain settlement and SLA monitoring.
+
+
+
+Agentic RAG for Reproducible Science
+
+FAIR-compliant RAG pipelines designed for scientific document processing and retrieval by agents doing scientific research.
+
+Required Technologies
+arkhai.io
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+User Experience (UX)
+Is the product intuitive, accessible, and visually polished? Would a user understand how to use it quickly?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Prizes
+View all prizes
+🏆
+
+Winner
+
+Arkhai
+​🧠 Agentic Funding & Coordination: Arkhai Agentic Commerce
+
+$1,000 USD
+
+​🧠 Agentic Funding & Coordination: Arkhai Agentic Commerce
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Required technologies
+
+arkhai.io
+
+Arkhai
+View all requirements
+
+​🧠 Agentic Funding & Coordination: Lit Protocol Challenge
+Sponsored by:
+Lit Protocol
+Lit Protocol
+Challenge Overview
+Build autonomous and private applications using Lit Protocol's programmable signing, encryption, and immutable compute infrastructure. The convergence of AI agents and crypto demands infrastructure where keys are never exposed, permissions are cryptographically enforced, and compute is verifiable — and that infrastructure is now accessible over plain HTTP. Lit provides the primitives to build agents that act autonomously, sign across chains, and handle private data without ever exposing keys to a centralized party.
+
+
+
+Technical Requirements / What Stands Out
+
+Projects should use the Lit Chipotle API (REST-based, no SDK required). Lit Actions are written in JavaScript and execute in a hardened Deno-based sandbox inside TEEs. Use the dashboard for account setup, PKP creation, API key scoping, and permission group management. For agent frameworks, integration with MCP, LangChain, or OpenAI AgentKit is encouraged. On-chain components should target Base. IPFS is used for immutable Lit Action storage.
+
+
+
+Strong projects will demonstrate meaningful use of Lit's core primitives — programmable signing, decryption gating, or immutable compute — rather than superficial integration. Projects showing true autonomy (human-out-of-the-loop), verifiable execution (TEE attestation or IPFS-pinned actions), and user sovereignty (clear permission scoping via Chipotle Groups) will score highest. Bonus for clean architecture using scoped API keys and Groups for fine-grained access control, and for leveraging the x402 payment standard for agent-to-service HTTP payments.
+
+
+
+Developer Guides / Toolkits
+
+Chipotle API: api.dev.litprotocol.com
+Dashboard: dashboard.dev.litprotocol.com
+Docs: docs.dev.litprotocol.com
+
+
+Submission Requirements
+
+Beyond a public GitHub repo and live demo:
+
+README with architecture documentation explaining how Lit primitives (signing, encryption, Lit Actions, PKPs, Groups) are used and why
+Deployed Lit Actions pinned to IPFS with CIDs documented, showing immutability of execution logic
+A brief security and trust model writeup describing what the TEE protects, what permissions are enforced, and how user sovereignty is maintained
+Optional: a 2–3 min demo video showing autonomous or private behavior in action
+Example Project Ideas
+Autonomous DeFi Agents with User-Delegated Authority
+
+Build agent wallets via Vincent that execute on-chain strategies — yield optimization, rebalancing, limit orders, DCA — governed by user-set policies like spending caps and time locks, all enforced by Lit's signing network.
+
+
+
+Private Data Applications with Programmable Access Control
+
+Use Lit's encryption and access control conditions to build private data marketplaces, token-gated content systems, sealed-bid auctions, or encrypted credential sharing where decryption is gated by on-chain state (token ownership, DAO membership, etc.).
+
+
+
+Cross-Chain Agent Infrastructure
+
+Leverage Lit's chain-agnostic PKPs and Lit Actions to build agents or protocols that sign transactions and pass messages across multiple blockchains (EVM, Solana, Cosmos) without centralized relayers — autonomous cross-chain solvers, bridges, or multi-chain portfolio managers.
+
+
+
+Agent-to-Agent Coordination with Verifiable Identity
+
+Build multi-agent systems where each agent holds its own decentralized identity (PKP), can authenticate to web2 and web3 services, and securely pass encrypted data between agents using Lit Actions — enabling trustless orchestration.
+
+Required Technologies
+lit-protocol
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+User Experience (UX)
+Is the product intuitive, accessible, and visually polished? Would a user understand how to use it quickly?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Prizes
+View all prizes
+🏆
+
+Winner
+
+Lit Protocol
+​🧠 Agentic Funding & Coordination: Lit Protocol Challenge
+
+$250 USD
+
+​🧠 Agentic Funding & Coordination: Lit Protocol Challenge
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Required technologies
+
+lit-protocol
+
+Lit Protocol
+View all requirements
+
+🛡️ AI Safety & Evaluation
+Sponsored by:
+Protocol Labs
+Protocol Labs
+Challenge Overview
+AI systems are being deployed faster than we can verify they're safe. This track is about building the infrastructure to close that gap—evaluations that find real failures, monitoring systems that catch misbehavior at runtime, and auditing tools that work on real agents in real environments. We want working prototypes that surface concrete vulnerabilities or behavioral failures. This is some of the most tractable safety work available right now, and the tools built here have direct paths into deployment at frontier labs and safety organizations.
+
+
+
+Requirements
+
+State whether your project is a new build or a meaningful advancement of an existing project
+Start from "what specific failure mode are we trying to catch?"—not "let's red-team something"
+Depth over breadth: a well-instrumented evaluation that finds and characterizes one failure mode is worth more than broad coverage that finds none
+Strong outputs are reusable: a benchmark, a dataset, an evaluation harness, or a protocol someone else can run
+Recommended tooling: Inspect AI (UK AISI's evaluation framework)
+
+
+Submission requirements
+
+Public GitHub repository
+
+Live demo (will happen post-submission to judges)
+
+Example Project Ideas
+Agentic security evaluation (OpenClaw) AI agents integrated with real tools—Slack, email, code execution, file systems—introduce a new class of security risks that traditional software auditing doesn't cover. OpenClaw is a concrete target: open-source, widely deployed, and poorly audited. Build something reusable that surfaces what risks an agent like this actually exposes a company to.
+
+Build a structured red-team evaluation suite covering prompt injection, social engineering, data exfiltration, and privilege escalation—and produce a human-readable vulnerability report
+Design an attack taxonomy for agentic systems grounded in realistic threat models
+Measure cross-context information leakage—how easily can an agent surface information from one user's context into another's
+Build automated red-teaming scaffolding using Inspect AI that can be pointed at any tool-integrated agent and run a configurable battery of adversarial scenarios
+
+
+Identifying and mitigating evaluation awareness Models are increasingly able to detect when they're being evaluated and adjust their behavior accordingly—appearing safer or more compliant than in real deployment. If a model can reliably distinguish a test from production, our evals measure performance theater, not actual behavior.
+
+Map which contextual features betray evaluation setups and measure how strongly each shifts model behavior across frontier models
+Build honeypot evaluations that mimic real deployment contexts and establish a behavioral gap metric
+Develop adversarial evaluation design guidelines—a practical checklist for eval authors to reduce evaluation awareness signal
+
+
+Runtime deception & scheming detection Models are increasingly capable of strategic deception—hiding reasoning, behaving differently under observation, and pursuing covert goals while appearing compliant. Our current window to study these behaviors, while CoT is still somewhat legible, is closing fast.
+
+Build a black-box scheming monitor trained on behavioral signatures in agent transcripts that flags potential covert goal pursuit
+Develop structured interrogation protocols that probe the gap between a model's stated reasoning and its actual behavior
+Fine-tune a lightweight CoT faithfulness classifier on faithful vs. obfuscated reasoning traces and stress-test it against adversarially prompted models
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Completeness/Functionality
+Is the product finished and fully functional? Or is it just a prototype with broken elements?
+
+Judges
+View all VIPs
+Diogo de Lucena
+Diogo de Lucena
+Zixuan Zhang
+Zixuan Zhang
+Prizes
+View all prizes
+🏆
+
+New project winner
+
+Protocol Labs
+🛡️ AI Safety & Evaluation
+
+$1,200 USD
+
+🛡️ AI Safety & Evaluation
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Protocol Labs
+View all requirements
+
+🏆
+
+Meaningful advancement of existing project
+
+Protocol Labs
+🛡️ AI Safety & Evaluation
+
+$800 USD
+
+🛡️ AI Safety & Evaluation
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Protocol Labs
+View all requirements
+
+🏆
+
+Winners
+
+Protocol Labs
+🛡️ AI Safety & Evaluation
+
+Invitation to pitch at Hello Tomorrow Demo Day
+
+🛡️ AI Safety & Evaluation
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Protocol Labs
+View all requirements
+
+🛡️ AI Safety & Evaluation: Kalibr Resilience Challenge
+Sponsored by:
+Kalibr
+Kalibr
+Challenge Overview
+Kalibr is infrastructure that lets AI agents route to the optimal execution path as they run in production. The challenge: build a multi-step agent or multi-agent system complex enough that running it repeatedly in production would feel risky. Multiple models, multiple tools, multiple decision points. The more complex the system, the more it needs Kalibr to succeed. Instrument it (or have your agent instrument it) with Kalibr, define your execution paths, and run it. Kalibr will route around failures and degradations in real time and shift traffic toward whatever's actually working. The best projects would show a clear delta between hardcoded runs and Kalibr-optimized runs.
+
+
+
+Technical Requirements 
+
+Preferred stack: Python or TypeScript. Open source SDK supports both (pip install kalibr / npm install kalibr). Works with any LLM provider (OpenAI, Anthropic, Google) and any framework (LangChain, CrewAI, OpenAI Agents SDK, OpenClaw). Auto-instrumentation requires two lines of code with no changes to existing agent logic.
+
+
+
+What Stands Out
+
+Show the before/after. Run your agent with hardcoded model calls, then run it with Kalibr optimizing paths. The delta in success rate and cost over repeated runs is the story.
+
+
+
+Developer Guides / Toolkits
+
+Docs: kalibr.systems/docs
+Autonomous onboarding for agents: kalibr.systems/docs/quickstart#autonomous
+Python SDK: pip install kalibr
+TypeScript SDK: npm install kalibr
+
+
+All hackathon participants receive 90 days free Kalibr Pro ($149/mo value — 10,000 routing decisions/month, 100,000 traces, unlimited retention, full dashboard).
+
+
+
+Example Project Ideas
+Multi-Agent Traffic Optimizer 
+
+A multi-agent system with multiple models and tools where Kalibr shifts traffic to the best-performing path as conditions change in real time.
+
+
+
+Resilient Multi-Step Workflow
+
+A multi-step workflow where each sub-agent stays on the optimal path based on real outcome data, not hardcoded model calls.
+
+
+
+Unsupervised Autonomous System
+
+An autonomous system complex enough that you'd be nervous leaving it running unsupervised—without optimization. Kalibr keeps it on track.
+
+
+
+Before/After Delta Demo
+
+Any agent system where teams can show the delta: static hardcoded paths vs. Kalibr continuously optimizing over repeated runs.
+
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+User Experience (UX)
+Is the product intuitive, accessible, and visually polished? Would a user understand how to use it quickly?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Judges
+View all VIPs
+Adeeb Valiulla
+Adeeb Valiulla
+Zixuan Zhang
+Zixuan Zhang
+Prizes
+View all prizes
+🏆
+
+Winner
+
+Kalibr
+🛡️ AI Safety & Evaluation: Kalibr Resilience Challenge
+
+1 Year Kalibr Pro
+
+🛡️ AI Safety & Evaluation: Kalibr Resilience Challenge
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Kalibr
+View all requirements
+
+🤝
+
+Top teams
+
+Kalibr
+🛡️ AI Safety & Evaluation: Kalibr Resilience Challenge
+
+Design partner access to Kalibr Pro + further credits
+
+🛡️ AI Safety & Evaluation: Kalibr Resilience Challenge
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Kalibr
+View all requirements
+
+🌐 Sovereign Infrastructure by Bittensor
+Sponsored by:
+Bittensor
+Bittensor
+Challenge Overview
+Sovereign Infrastructure is the track for builders who believe that the most critical systems—identity, compute, communication, coordination—should operate without gatekeepers, kill switches, or permission from any central authority. Infrastructure that can be shut down, surveilled, or captured will eventually be shut down, surveilled, or captured. As AI agents become increasingly autonomous actors in the world, this question becomes urgent in a new way: who controls the stack when the stack starts making decisions? Who authorized the agent? Who owns the machine it runs on? This track sits at the intersection of cypherpunk fundamentals and frontier AI. We're looking for projects that make censorship, surveillance, and shutdown structurally harder.
+
+
+
+Requirements
+
+Must touch some part of the Bittensor stack
+State whether your project is a new build or a meaningful advancement of an existing project
+Clearly state your threat model, what you protect against, and what the current limitations are. Show that something meaningful works without relying on a trusted third party
+
+
+Submission requirements
+
+Public GitHub repository
+
+Live demo (will happen post-submission to judges)
+
+Written project description covering what you built, the threat model it addresses, and its current limitations & documentation of any cryptographic assumptions or trust boundaries in the design
+
+Example Project Ideas
+Agent Identity & Authorization: Build a credentialing system for AI agents that is verifiable, revocable, and portable—without relying on a centralized registry
+Censorship-Resistant Communication: Build a messaging or coordination layer for agents and humans that removes single points of failure and cannot be silenced or rate-limited by any one party
+Sovereign Compute: Run a model or computation on decentralized infrastructure and produce a verifiable output—who owns the machine matters as much as who owns the model
+Unstoppable Publishing & Coordination: Build infrastructure for publishing or coordinating with no single point of failure—nothing that can be taken down, defunded, or deplatformed
+Private Human-Agent Interaction: Build an interface where a human interacts with an AI agent without the interaction being logged, surveilled, or sold
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Completeness/Functionality
+Is the product finished and fully functional? Or is it just a prototype with broken elements?
+
+Judges
+View all VIPs
+Tereza Bizkova
+Tereza Bizkova
+Eugene Lopin
+Eugene Lopin
+Prizes
+View all prizes
+🏆
+
+New project winner
+
+Bittensor
+🌐 Sovereign Infrastructure by Bittensor
+
+$1,500 USD
+
+🌐 Sovereign Infrastructure by Bittensor
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Bittensor
+View all requirements
+
+🏆
+
+Meaningful advancement of existing project
+
+Bittensor
+🌐 Sovereign Infrastructure by Bittensor
+
+$1,000 USD
+
+🌐 Sovereign Infrastructure by Bittensor
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Bittensor
+View all requirements
+
+🏆
+
+Winners
+
+Bittensor
+🌐 Sovereign Infrastructure by Bittensor
+
+Invitation to pitch at Hello Tomorrow Demo Day
+
+🌐 Sovereign Infrastructure by Bittensor
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Bittensor
+View all requirements
+
+🌐 Sovereign Infrastructure: Bittensor Challenge
+Sponsored by:
+Bittensor
+Bittensor
+Challenge Overview
+Design a sovereign AI layer as a Bittensor subnet—the ecosystem's startup equivalent. Instead of assembling a closed team, the subnet owner defines work to be done and how quality is measured, then opens it permissionlessly. Distributed, independent miners compete to produce open source work output; validators check quality and assign scores. The network pays top performing miners in the subnet's alpha token, convertible to Bittensor's base currency, TAO.
+
+
+
+New to Bittensor? Start here: Bittensor Overview · What is Bittensor?
+
+Join the official 'Sovereign Infra | Bittensor Challenge' Telegram group
+
+
+
+This challenge runs within the Sovereign Infrastructure track at the Intelligence at the Frontier Hackathon. The hackathon program officially starts March 14—but this challenge starts early, on March 11.
+
+
+
+Why this structure wins
+
+Centralized AI has structural tradeoffs. Here's how Bittensor addresses each:
+
+
+
+Cost: Darwinian competition continually drives down the cost of digital commodities to their game-theoretic equilibrium
+Quality: Miners compete for all outputs—only the best responses are remunerated
+Speed: Parallel execution across miners reduces bottlenecks
+Access: Permissionless access and open source commodities remove gatekeepers
+Uptime: Distributed architecture eliminates single points of failure
+Transparency: Open-source production makes the pipeline transparent
+Privacy: Cryptographically provable privacy being implemented across subnets
+
+
+Currently, 128 subnets produce valuable outputs across 22+ vertical categories. See the Bittensor Subnet Output Taxonomy for inspiration and example project directions.
+
+
+
+Sovereignty test: if any single cloud, company, API fails, or a policy changes, does your subnet still produce value?
+
+
+
+This challenge is open to engineers building AI infrastructure, founders with a domain problem that could benefit from decentralized competition, distributed systems or incentive mechanism designers, and teams new to Bittensor.
+
+
+
+For developers, get started here:
+
+Install Bittensor SDK
+Bittensor GitHub
+
+
+Requirements Your submission must address all six build requirements:
+
+Benchmark: target output quality metric miners are scored on
+Evaluation loop: how validators score miners; cost and scale considerations
+Miner task: specific, measurable, implementable task interface
+Incentive design: why scoring rewards genuine quality; why top attack vectors fail
+Market demand: who pays for output and why
+Sovereignty test: subnet survives if any single cloud, company, or API disappears
+
+
+Mentor support is available throughout—subnet operators will pressure-test designs, unblock teams, and run daily checkpoints during the event. Top 3 teams receive tiered post-event incubation.
+
+
+
+Building your subnet? Key resources:
+
+Subnet Creation
+Subnet Template
+Vibe Codable Subnet Template
+Mining
+Validating
+Testnet
+
+
+Submission requirements
+
+Public GitHub repository
+Live demo—team members must be on-site for judging on March 15
+Subnet spec addressing all six build requirements above
+Submit via DevSpot by March 15
+
+
+Judging criteria
+
+Market demand: worth building, real output buyer
+Technical Execution: credible mainnet path, subnet API use, testnet, working demo
+Relevance to Theme/Challenge: miner task is clear and measurable; validator scoring is cost-efficient and scalable
+Scalability/Future Potential: economics drive good behavior, resistant to gaming, sustains itself with a revenue path beyond emissions
+
+
+Other Bittensor ecosystem events in SF:
+
+Bittensor 101 – March 27
+Bittensor Breakout – March 30
+Example Project Ideas
+Out-competing centralized AI doesn't mean beating it on every dimension. Think in terms of tradeoffs:
+
+
+
+A subnet producing 90% quality at 5% cost wins markets where that ratio matters
+A subnet with higher latency but zero censorship risk wins where uninterruptible access is worth it
+
+
+Which tradeoffs hurt most in your target market? Start there.
+
+Required Technologies
+bittensor
+Submission Requirements
+summary
+github
+demo
+documentation
+Judging Criteria
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Scalability/Future Potential
+Could the project scale beyond the hackathon? Does it have a sustainable architecture or business model?
+
+Use of Sponsor Tech/APIs
+Especially in bounty-driven hackathons — how well did the team integrate and showcase the required sponsor technology?
+
+Judges
+View all VIPs
+Eugene Lopin
+Eugene Lopin
+Prizes
+View all prizes
+🥇
+
+1st Place
+
+Bittensor
+🌐 Sovereign Infrastructure: Bittensor Challenge
+
+$1,000 USD
+
+$3,000 Basilica AI compute credits + discretionary investment up to 1,000 TAO (@UnsupervisedCap) + 50 TAO mainnet registration fee (@CrucibleLabs) + 1:1 post-event mentoring and incubation (@bitStarterAI)
+
+🌐 Sovereign Infrastructure: Bittensor Challenge
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Required technologies
+
+bittensor
+
+Bittensor
+View all requirements
+
+🥈
+
+2nd place
+
+Bittensor
+🌐 Sovereign Infrastructure: Bittensor Challenge
+
+$600 USD
+
+$1,500 Basilica AI compute credits + 1:1 post-event mentoring and incubation
+
+🌐 Sovereign Infrastructure: Bittensor Challenge
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Required technologies
+
+bittensor
+
+Bittensor
+View all requirements
+
+🥉
+
+3rd place
+
+Bittensor
+🌐 Sovereign Infrastructure: Bittensor Challenge
+
+$400 USD
+
+$500 Basilica AI compute credits + Bittensor ecosystem intros
+
+🌐 Sovereign Infrastructure: Bittensor Challenge
+
+Submission Requirements
+
+summary
+github
+demo
+documentation
+Required technologies
+
+bittensor
+
+Bittensor
+View all requirements
+
+🌸 BONUS: Made by Human by human.tech
+Sponsored by:
+Human.tech by Holonym Foundation
+Human.tech by Holonym Foundation
+Challenge Overview
+Open to all tracks · Up to $6,000 in cash awards
+
+
+
+human.tech is offering up to $6,000 in cash awards as a bonus challenge open to all hackathon participants across all tracks. The only hard requirement is that you register and verify your humanity at frontier.human.tech. 
+
+
+
+We encourage everyone to submit there in addition to their main track submission on DevSpot.
+
+
+
+What projects get awarded? We care about agentic finance, human distributions for public good funding, decentralized coordination and voting, and privacy implementations with private identity. We're also open to non-code contributions such as novel research proposals, papers, articles, essays, demonstrations, and artistic contributions—as long as they align with one or more of the 10 Covenant principles.
+
+
+
+This challenge floats across all tracks—submitting here does not affect your eligibility for your main track prizes.
+
+
+
+Bounties
+
+Up to $6,000 total in cash, awarded across as many qualifying projects as possible until the pool is exhausted:
+
+
+
+$1,200 per award — for new projects built at this hackathon
+$800 per award — for projects that meaningfully advance existing work
+
+
+Each submission is awarded the higher or lower tier depending on whether it is new or builds on something existing. Cash awards distributed now. $HUMN token grants for outstanding contributors to be announced post-event. Winning work will be minted.
+
+
+
+Requirements
+
+To be eligible:
+
+Register and verify your humanity on frontier.human.tech.
+Project must meet Covenant principles (humanistic tech values)
+Build with or integrate human.tech tools—WaaP, Human Passport, Human Network—or demonstrate clear alignment with their stack
+Complete your profile (GitHub-linked accounts encouraged) and share your submission with the community to receive upvotes
+
+
+Submissions that don't meet the Covenant principles or don't register on frontier.human.tech are not eligible, regardless of technical quality.
+
+
+
+Judging
+
+Judging for this challenge happens asynchronously after the event. A short video walkthrough of your project is strongly encouraged to help curators evaluate your work.
+
+
+
+All judging is at human.tech's discretion. Projects are evaluated on:
+
+Covenant alignment — Does the project embody one or more of the 10 Covenant principles? Is it distinctly human in nature?
+human.tech integration — Does it use WaaP, Human Passport, Human Network, or meaningfully build on the human.tech stack?
+Impact potential — Could this realistically serve public good funding, decentralized coordination, privacy-preserving identity, or agentic finance?
+Craft & completeness — Is the work well-executed relative to its scope? A polished essay or demo counts as much as a half-built app.
+Community signal — Upvotes from verified humans on frontier.human.tech will be considered as a signal, but are not the sole deciding factor.
+
+
+AI as a tool is allowed. Distinctly human in nature is the standard.
+
+Example Project Ideas
+Apps with agent wallets (WaaP):
+
+Autonomous agents with delegated, scoped custody via WaaP CLI
+Agent-powered trading (e.g. Polymarket agent using WaaP for safe transactions)
+Human-gated applications using Passport:
+
+Any app using Passport Embed for sybil-resistant access
+Privacy implementations:
+
+Private payment bridges (e.g. Human Bridge on Aztec for private payments)
+Non-code contributions:
+
+Essays or papers on humanistic technology, public goods, or AI governance
+Artistic works that embody a Covenant principle
+Demonstrations or proposals for novel coordination mechanisms
+
+
+Submission Requirements
+summary
+demo
+documentation
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+User Experience (UX)
+Is the product intuitive, accessible, and visually polished? Would a user understand how to use it quickly?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Judges
+View all VIPs
+Zara Iqbal
+Zara Iqbal
+daniel
+daniel
+Prizes
+View all prizes
+🏆
+
+New project winner (awarded per qualifying submission until $6,000 pool is exhausted)
+
+Human.tech by Holonym Foundation
+🌸 BONUS: Made by Human by human.tech
+
+$1,200 USD
+
+🌸 BONUS: Made by Human by human.tech
+
+Submission Requirements
+
+summary
+demo
+documentation
+Human.tech by Holonym Foundation
+View all requirements
+
+🏆
+
+Meaningful advancement of existing project winners (awarded per qualifying submission until $6,000 pool is exhausted)
+
+Human.tech by Holonym Foundation
+🌸 BONUS: Made by Human by human.tech
+
+$800 USD
+
+🌸 BONUS: Made by Human by human.tech
+
+Submission Requirements
+
+summary
+demo
+documentation
+Human.tech by Holonym Foundation
+View all requirements
+
+🖥️ BONUS: The ElevenLabs Voice Challenge
+Sponsored by:
+ElevenLabs
+ElevenLabs
+Challenge Overview
+Voice is becoming infrastructure. ElevenLabs is offering a dedicated prize for the team that builds the most compelling, technically ambitious project using the ElevenLabs API—eligible across all tracks.
+
+
+
+To be eligible, your project must:
+
+Integrate the ElevenLabs API in a meaningful, non-trivial way—not just a surface-level call
+Include a GitHub repo with clear documentation of how ElevenLabs is used
+Demo a live, working implementation at submission
+
+
+What we're looking for:
+
+We're not looking for text-to-speech wrappers. The strongest submissions will demonstrate agentic depth—autonomous systems that handle complex logic, real-time dialogue, and meaningful interaction with users or other agents. Think: conversational AI that feels alive, multimodal implementations combining voice and video, or agents with deliberately crafted personalities and emotional range.
+
+
+
+Bonus points for low-latency design, novel use cases that solve a real problem, and creative prompt engineering that pushes what voice AI can do. Browse past winning projects for inspiration.
+
+
+
+Submission requirements:
+
+ElevenLabs API must be meaningfully integrated
+GitHub repo + live demo required
+
+
+All registered builders get 1 free month of ElevenLabs Creator tier. Here's how to claim it:
+
+Join the ElevenLabs Discord
+Find the #🎟️│coupon-codes channel
+Click Start Redemption, select the event, and enter the email you registered with (please note that if you registered for this hackathon last minute, there may be delays)
+The bot sends your unique code instantly
+
+
+Need help? Watch the 60-second tutorial or ask in the Discord. The full hacker guide has everything else you need to get started.
+
+Required Technologies
+elevenlabs
+Submission Requirements
+documentation
+demo
+github
+summary
+Judging Criteria
+Innovation/Creativity
+How original, novel, or imaginative the idea is — does it introduce something new or approach an old problem in a new way?
+
+Technical Execution
+The complexity, robustness, and quality of the code or architecture — does it work and was it hard to build?
+
+User Experience (UX)
+Is the product intuitive, accessible, and visually polished? Would a user understand how to use it quickly?
+
+Impact/Usefulness
+Does the project solve a real problem? Could it meaningfully improve lives or systems if deployed?
+
+Judges
+View all VIPs
+Shai Perednik
+Shai Perednik
+Nneoma Kanu
+Nneoma Kanu
+Prizes
+View all prizes
+🏆
+
+Overall winning team
+
+ElevenLabs
+🖥️ BONUS: The ElevenLabs Voice Challenge
+
+Each team member receives 3 months of our Pro tier ($297 value/team member)
+
+🖥️ BONUS: The ElevenLabs Voice Challenge
+
+Submission Requirements
+
+documentation
+demo
+github
+summary
+Required technologies
+
+elevenlabs
+
+ElevenLabs
+View all requirements
+
+🏆
+
+Best project built with ElevenLabs
+
+ElevenLabs
+🖥️ BONUS: The ElevenLabs Voice Challenge
+
+Each team member receives 6 months of our Scale tier ($1980 value/team member)
+
+🖥️ BONUS: The ElevenLabs Voice Challenge
+
+Submission Requirements
+
+documentation
+demo
+github
+summary
+Required technologies
+
+elevenlabs
+
+ElevenLabs
+View all requirements
+
+Terms & Conditions
+Terms of Service
+Manifesto
+Press & Media
+Privacy Policy
+Code of Conduct
+Pricing model
