@@ -7,6 +7,10 @@
  */
 
 export * from "./apiError";
+export * from "./authorizationSessionHeaderParameter";
+export * from "./authUser";
+export * from "./authUserEnvelope";
+export * from "./beginBrowserLoginParams";
 export * from "./bounty";
 export * from "./bountyStatus";
 export * from "./claimBountyBody";
@@ -14,11 +18,16 @@ export * from "./completeBountyBody";
 export * from "./createBountyBody";
 export * from "./createOpenaiConversationBody";
 export * from "./createResidentBody";
+export * from "./errorEnvelope";
+export * from "./handleBrowserLoginCallbackParams";
 export * from "./healthStatus";
 export * from "./listBountiesParams";
 export * from "./listBountiesStatus";
 export * from "./listResidentsParams";
 export * from "./listTransactionsParams";
+export * from "./logoutSuccess";
+export * from "./mobileTokenExchangeRequest";
+export * from "./mobileTokenExchangeSuccess";
 export * from "./openaiConversation";
 export * from "./openaiConversationWithMessages";
 export * from "./openaiError";

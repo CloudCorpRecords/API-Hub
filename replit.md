@@ -34,6 +34,7 @@ artifacts-monorepo/
 │   ├── api-client-react/      # Generated React Query hooks
 │   ├── api-zod/               # Generated Zod schemas from OpenAPI
 │   ├── db/                    # Drizzle ORM schema + DB connection
+│   ├── replit-auth-web/       # useAuth() hook for Replit OIDC (browser)
 │   ├── integrations-openai-ai-server/  # OpenAI server SDK
 │   └── integrations-openai-ai-react/   # OpenAI React hooks
 ├── scripts/                   # Utility scripts (seed, etc.)
@@ -45,6 +46,8 @@ artifacts-monorepo/
 
 ## Database Schema
 
+- **sessions** — Replit Auth session store (sid, sess jsonb, expire)
+- **users** — Auth user profiles (id, email, firstName, lastName, profileImageUrl)
 - **bounties** — Task/bounty listings with title, description, reward (USDC), status (open/claimed/completed/cancelled), creator/claimer wallets, proof of work
 - **residents** — Community member profiles with name, wallet, skills (jsonb), floor, status (online/offline/busy), bio, stats
 - **transactions** — Treasury ledger (escrow_lock, escrow_release, payout, deposit, refund) with amounts, wallets, bounty references

@@ -8,10 +8,13 @@ import {
   MessageSquare, 
   Menu, 
   X,
-  Cpu
+  Cpu,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWallet } from '@/hooks/use-wallet';
+import { useAuth } from '@workspace/replit-auth-web';
 import { CyberButton } from './CyberButton';
 
 const navItems = [
@@ -26,6 +29,11 @@ export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isConnected, walletAddress, connect, disconnect } = useWallet();
+  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+
+  const displayName = user
+    ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email || 'Resident'
+    : null;
 
   return (
     <div className="min-h-screen bg-background flex text-foreground selection:bg-primary/30 selection:text-primary">
@@ -62,8 +70,46 @@ export function Layout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-border">
-          <div className="text-xs font-sans text-muted-foreground flex items-center gap-2 mb-2">
+        {/* User identity in sidebar */}
+        <div className="p-4 border-t border-border space-y-3">
+          {!isLoading && isAuthenticated && user && (
+            <div className="flex items-center gap-2 group">
+              {user.profileImageUrl ? (
+                <img
+                  src={user.profileImageUrl}
+                  alt={displayName ?? 'User'}
+                  className="w-7 h-7 rounded-full border border-primary/30 object-cover flex-shrink-0"
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-full border border-primary/30 bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary text-[10px] font-bold">
+                    {(displayName ?? 'R')[0].toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-sans text-foreground truncate">{displayName}</p>
+                <p className="text-[10px] text-muted-foreground">RESIDENT</p>
+              </div>
+              <button
+                onClick={logout}
+                title="Log out"
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          {!isLoading && !isAuthenticated && (
+            <button
+              onClick={login}
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-cyan-400 transition-colors w-full"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              Log in
+            </button>
+          )}
+          <div className="text-xs font-sans text-muted-foreground flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
             SYS_ONLINE
           </div>
@@ -91,9 +137,43 @@ export function Layout({ children }: { children: ReactNode }) {
             <span className="animate-pulse ml-1 text-primary">_</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Auth controls */}
+            {!isLoading && (
+              isAuthenticated ? (
+                <div className="flex items-center gap-3">
+                  {user?.profileImageUrl && (
+                    <img
+                      src={user.profileImageUrl}
+                      alt={displayName ?? 'User'}
+                      className="w-7 h-7 rounded-full border border-primary/40 object-cover hidden sm:block"
+                    />
+                  )}
+                  <span className="text-xs font-sans text-muted-foreground hidden sm:inline">
+                    {displayName}
+                  </span>
+                  <button
+                    onClick={logout}
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Log out</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={login}
+                  className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-medium"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  Log in
+                </button>
+              )
+            )}
+
+            {/* Wallet controls */}
             {isConnected ? (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <span className="text-xs font-sans text-muted-foreground hidden sm:inline-block">
                   {walletAddress?.slice(0,6)}...{walletAddress?.slice(-4)}
                 </span>
@@ -150,6 +230,23 @@ export function Layout({ children }: { children: ReactNode }) {
                 );
               })}
             </nav>
+            {/* Mobile auth */}
+            <div className="p-4 border-t border-border">
+              {!isLoading && (
+                isAuthenticated ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground truncate max-w-[140px]">{displayName}</span>
+                    <button onClick={logout} className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1">
+                      <LogOut className="w-3.5 h-3.5" /> Log out
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={login} className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300">
+                    <LogIn className="w-4 h-4" /> Log in
+                  </button>
+                )
+              )}
+            </div>
           </aside>
         </div>
       )}

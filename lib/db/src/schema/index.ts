@@ -1,3 +1,4 @@
+export * from "./auth";
 export * from "./bounties";
 export * from "./residents";
 export * from "./transactions";
