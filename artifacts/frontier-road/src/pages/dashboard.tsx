@@ -157,38 +157,39 @@ export default function Dashboard() {
             const dotColor = fs.urgent ? 'bg-red-500' : fs.issues > 0 ? 'bg-yellow-500' : 'bg-accent';
             return (
               <CyberCard key={fs.floor} className={`${statusColor} p-4`}>
-                <Link href={`/residents?floor=${fs.floor}`} className="block cursor-pointer">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-display tracking-widest text-sm text-foreground uppercase">Floor {fs.floor}</span>
-                    </div>
-                    <span className={`w-2.5 h-2.5 rounded-full ${dotColor} ${fs.urgent ? 'animate-pulse' : ''}`} />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-display tracking-widest text-sm text-foreground uppercase">Floor {fs.floor}</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs font-sans text-muted-foreground mb-2">
-                    <span>{fs.online} online / {fs.residents} residents</span>
+                  <span className={`w-2.5 h-2.5 rounded-full ${dotColor} ${fs.urgent ? 'animate-pulse' : ''}`} />
+                </div>
+                <div className="flex items-center justify-between text-xs font-sans text-muted-foreground mb-2">
+                  <span>{fs.online} online / {fs.residents} residents</span>
+                </div>
+                {fs.issues > 0 ? (
+                  <div className="flex items-center gap-1.5 text-xs font-sans">
+                    <AlertCircle className="w-3.5 h-3.5 text-yellow-500" />
+                    <span className="text-yellow-500">{fs.issues} open issue{fs.issues > 1 ? 's' : ''}</span>
                   </div>
-                  {fs.issues > 0 ? (
-                    <div className="flex items-center gap-1.5 text-xs font-sans">
-                      <AlertCircle className="w-3.5 h-3.5 text-yellow-500" />
-                      <span className="text-yellow-500">{fs.issues} open issue{fs.issues > 1 ? 's' : ''}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-xs font-sans">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
-                      <span className="text-accent">All clear</span>
-                    </div>
-                  )}
-                </Link>
-                {fs.issues > 0 && (
-                  <div className="mt-3 pt-2 border-t border-border/30">
-                    <Link href={`/bounties?floor=${fs.floor}&category=MAINTENANCE`}>
-                      <span className="text-[10px] uppercase tracking-widest text-yellow-500 hover:text-yellow-400 transition-colors cursor-pointer">
-                        View {fs.issues} maintenance issue{fs.issues > 1 ? 's' : ''} &rarr;
-                      </span>
-                    </Link>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs font-sans">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
+                    <span className="text-accent">All clear</span>
                   </div>
                 )}
+                <div className="mt-3 pt-2 border-t border-border/30 flex gap-3">
+                  <Link href={`/residents?floor=${fs.floor}`}>
+                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors cursor-pointer">
+                      Residents &rarr;
+                    </span>
+                  </Link>
+                  <Link href={`/bounties?floor=${fs.floor}&category=MAINTENANCE`}>
+                    <span className={`text-[10px] uppercase tracking-widest transition-colors cursor-pointer ${fs.issues > 0 ? 'text-yellow-500 hover:text-yellow-400' : 'text-muted-foreground hover:text-primary'}`}>
+                      Issues{fs.issues > 0 ? ` (${fs.issues})` : ''} &rarr;
+                    </span>
+                  </Link>
+                </div>
               </CyberCard>
             );
           })}
