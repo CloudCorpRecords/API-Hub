@@ -3,8 +3,9 @@ import { useListOpenaiConversations, useCreateOpenaiConversation, getListOpenaiC
 import { useQueryClient } from '@tanstack/react-query';
 
 export type ChatMessage = {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'tool_status';
   content: string;
+  toolName?: string;
 };
 
 export function useChatStream(conversationId?: number) {
@@ -14,9 +15,7 @@ export function useChatStream(conversationId?: number) {
   const sendMessage = async (content: string) => {
     if (!conversationId) return;
     
-    // Optimistic user message
     setMessages(prev => [...prev, { role: 'user', content }]);
-    // Placeholder for assistant response
     setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
     setIsStreaming(true);
 
@@ -46,10 +45,32 @@ export function useChatStream(conversationId?: number) {
               const data = JSON.parse(line.slice(6));
               if (data.done) break;
               
+              if (data.tool_status) {
+                setMessages(prev => {
+                  const last = prev[prev.length - 1];
+                  if (last && last.role === 'tool_status' && last.content === data.tool_status) {
+                    return prev;
+                  }
+                  const withoutEmptyAssistant = last && last.role === 'assistant' && last.content === ''
+                    ? prev.slice(0, -1)
+                    : prev;
+                  return [
+                    ...withoutEmptyAssistant,
+                    { role: 'tool_status', content: data.tool_status, toolName: data.tool_name },
+                  ];
+                });
+                continue;
+              }
+              
               if (data.content) {
                 setMessages(prev => {
                   const newMessages = [...prev];
-                  newMessages[newMessages.length - 1].content += data.content;
+                  const lastMsg = newMessages[newMessages.length - 1];
+                  if (lastMsg && lastMsg.role === 'assistant') {
+                    lastMsg.content += data.content;
+                  } else {
+                    newMessages.push({ role: 'assistant', content: data.content });
+                  }
                   return newMessages;
                 });
               }
@@ -63,7 +84,12 @@ export function useChatStream(conversationId?: number) {
       console.error("Chat error:", err);
       setMessages(prev => {
         const newMessages = [...prev];
-        newMessages[newMessages.length - 1].content = "[SYSTEM ERROR: CONNECTION LOST]";
+        const lastMsg = newMessages[newMessages.length - 1];
+        if (lastMsg && lastMsg.role === 'assistant') {
+          lastMsg.content = "[SYSTEM ERROR: CONNECTION LOST]";
+        } else {
+          newMessages.push({ role: 'assistant', content: "[SYSTEM ERROR: CONNECTION LOST]" });
+        }
         return newMessages;
       });
     } finally {

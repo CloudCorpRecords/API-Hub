@@ -15,7 +15,7 @@ The architecture is API-first — all functionality is exposed via REST endpoint
 - **Frontend**: React + Vite + Tailwind CSS (dark cyberpunk theme)
 - **API framework**: Express 5
 - **Database**: PostgreSQL + Drizzle ORM
-- **AI**: OpenAI via Replit AI Integrations (gpt-5.2 for chat)
+- **AI**: OpenAI via Replit AI Integrations (gpt-4o for chat with tool calling)
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
@@ -89,7 +89,18 @@ artifacts-monorepo/
 - **Bounty Board** (`/bounties`) — Filterable bounty list with real-time search, create/claim/complete flows, proper proof submission modal (no window.prompt), supports `?floor=N&category=MAINTENANCE` URL params
 - **Resident Hub** (`/residents`) — Resident grid with skill tags and search, supports `?floor=N` URL filter
 - **Treasury** (`/treasury`) — Financial overview with real transaction-based chart, transaction ledger
-- **AI Concierge** (`/chat`) — Chat with Tower AI, auto-creates session if none exist
+- **AI Concierge** (`/chat`) — Chat with Tower AI with real tool calling: list bounties, find residents by skill, check treasury, report issues. Live context injection. Tool status indicators stream inline.
+
+## Tower AI Tool Calling
+
+Tower AI has access to 5 tools that query/mutate the live database:
+- **list_bounties(status?, category?, floor?)** — Search bounties with filters
+- **find_residents_by_skill(skill)** — Find residents by skill keyword match
+- **get_residents_by_floor(floor)** — List all residents on a floor
+- **get_treasury_status()** — Live treasury balance, escrow, payouts
+- **report_floor_issue(floor, location, description, urgency?)** — Creates MAINTENANCE bounty
+
+Each request includes a live context snapshot (open bounty count, treasury balance, resident count, recent transactions) injected into the system prompt. Tool call results stream back via SSE with inline status indicators ("Querying bounty board...", "Looking up residents...", etc.).
 
 ## Auth & Wallet
 

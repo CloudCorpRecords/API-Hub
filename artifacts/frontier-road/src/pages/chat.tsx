@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useChatStream, useConversations } from '@/hooks/use-chat';
 import { CyberCard } from '@/components/CyberCard';
 import { CyberButton } from '@/components/CyberButton';
-import { Send, Terminal, Bot, MessageSquarePlus } from 'lucide-react';
+import { Send, Terminal, Bot, MessageSquarePlus, Loader2, Search, Database, Wrench } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Chat() {
@@ -149,22 +149,34 @@ export default function Chat() {
             </div>
           )}
 
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] border p-4 ${
-                msg.role === 'user'
-                  ? 'bg-primary/10 border-primary/30 text-foreground'
-                  : 'bg-card border-border text-foreground'
-              }`}>
-                <div className="text-[10px] uppercase font-display tracking-widest mb-2 opacity-50 flex items-center gap-1">
-                  {msg.role === 'user' ? 'USER_INPUT' : 'SYS_RESPONSE'}
+          {messages.map((msg, i) => {
+            if (msg.role === 'tool_status') {
+              return (
+                <div key={i} className="flex justify-start">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 border border-primary/20 text-xs font-sans text-primary/80">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>{msg.content}</span>
+                  </div>
                 </div>
-                <div className="font-sans text-sm whitespace-pre-wrap leading-relaxed">
-                  {msg.content || (isStreaming && i === messages.length - 1 ? <span className="animate-pulse">_</span> : '')}
+              );
+            }
+            return (
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] border p-4 ${
+                  msg.role === 'user'
+                    ? 'bg-primary/10 border-primary/30 text-foreground'
+                    : 'bg-card border-border text-foreground'
+                }`}>
+                  <div className="text-[10px] uppercase font-display tracking-widest mb-2 opacity-50 flex items-center gap-1">
+                    {msg.role === 'user' ? 'USER_INPUT' : 'SYS_RESPONSE'}
+                  </div>
+                  <div className="font-sans text-sm whitespace-pre-wrap leading-relaxed">
+                    {msg.content || (isStreaming && i === messages.length - 1 ? <span className="animate-pulse">_</span> : '')}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <div ref={bottomRef} />
         </div>
 
