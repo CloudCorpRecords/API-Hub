@@ -60,6 +60,30 @@ The track wants agents that *take action* — vote on proposals, move funds, eva
 
 ---
 
+#### 4. 🤖 Metaplex Onchain Agent — $5,000 (STRONG FIT)
+**Sponsor:** Metaplex · **Prize:** $5,000
+
+The Metaplex Onchain Agent track rewards projects that give an AI agent a verifiable, permanent onchain identity using the MPL Agent Registry protocol.
+
+| Requirement | Evidence |
+|---|---|
+| AI agent with verifiable onchain identity | Tower is registered as an MPL Core asset (`8zMFimNffoNhXYP1YZgdoMZ5TwvgxW9bBZ9dzg4YDj79`) on Solana devnet |
+| Agent Card URI (ERC-8004) | `https://towerroad.replit.app/api/agent-card` — serves full agent capability manifest |
+| Identity registered via `registerIdentityV1` | TX confirmed on devnet via `@metaplex-foundation/mpl-agent-registry` |
+| Agent has real capabilities, not a stub | Tower executes 10 live tool calls: SOL transfers, TAO payouts, bounties, skill matching, Bittensor AI, maintenance reports |
+| A2A (Agent-to-Agent) endpoint | Agent card includes `"A2A"` service endpoint listing all 10 Tower skills with IDs |
+| MPL Core asset with agent registration URI | Asset `8zMFimNffoNhXYP1YZgdoMZ5TwvgxW9bBZ9dzg4YDj79` points to agent card URI |
+
+**What stands out:** Tower's identity is live on-chain right now. The agent card is a valid ERC-8004 JSON doc with real skills, real wallets (Solana + Bittensor), and A2A service definition. The registration used `mplAgentIdentity` UMI plugin + `registerIdentityV1` instruction with finalized tx confirmation.
+
+**Key values:**
+- MPL Core Asset: `8zMFimNffoNhXYP1YZgdoMZ5TwvgxW9bBZ9dzg4YDj79`
+- Agent Card: `https://towerroad.replit.app/api/agent-card`
+- Explorer: `https://explorer.solana.com/address/8zMFimNffoNhXYP1YZgdoMZ5TwvgxW9bBZ9dzg4YDj79?cluster=devnet`
+- Env var: `TOWER_METAPLEX_ASSET=8zMFimNffoNhXYP1YZgdoMZ5TwvgxW9bBZ9dzg4YDj79`
+
+---
+
 ## Overview
 
 **Frontier Road** is a full-stack web application that serves as the operating system for a co-living/hacker space community with an integrated bounty marketplace. Residents can post tasks with Solana USDC rewards, claim and complete bounties, coordinate resources, match skills, and chat with an AI concierge ("Tower").

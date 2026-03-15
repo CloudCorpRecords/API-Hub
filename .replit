@@ -35,3 +35,7 @@ TOWER_BITTENSOR_SS58 = "5Fxx8eF9eay7EzJF463of5UfR8eWoaVaVuFjxFs6JDc1yTtV"
 TOWER_BITTENSOR_MNEMONIC = "foil field soup lawn simple insane ticket maple foster friend leopard ribbon"
 BITTENSOR_NETWORK = "finney"
 BITTENSOR_AI_BASE_URL = "https://llm.chutes.ai/v1"
+TOWER_METAPLEX_ASSET = "8zMFimNffoNhXYP1YZgdoMZ5TwvgxW9bBZ9dzg4YDj79"
+
+[nix]
+channel = "stable-25_05"

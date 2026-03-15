@@ -55,3 +55,24 @@ export function useBittensorWallet() {
     staleTime: 30_000,
   });
 }
+
+interface MetaplexAgent {
+  registered: boolean;
+  assetPublicKey: string | null;
+  registrationUri: string | null;
+  explorerUrl: string | null;
+  network: string;
+}
+
+export function useMetaplexAgent() {
+  return useQuery<MetaplexAgent>({
+    queryKey: ["metaplex-agent"],
+    queryFn: async () => {
+      const res = await fetch("/api/metaplex/tower-agent");
+      if (!res.ok) throw new Error("Failed to fetch Metaplex agent status");
+      return res.json();
+    },
+    refetchInterval: 120_000,
+    staleTime: 60_000,
+  });
+}

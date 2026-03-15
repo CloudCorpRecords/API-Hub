@@ -8,6 +8,7 @@ import openaiRouter from "./openai";
 import meRouter from "./me";
 import solanaRouter from "./solana";
 import bittensorRouter from "./bittensor";
+import metaplexRouter from "./metaplex";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(treasuryRouter);
 router.use(openaiRouter);
 router.use(solanaRouter);
 router.use(bittensorRouter);
+router.use(metaplexRouter);
 
 export default router;

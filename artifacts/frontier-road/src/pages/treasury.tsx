@@ -1,8 +1,8 @@
 import { useMemo, useState, useCallback } from 'react';
-import { useTreasuryOverview, useTransactions, useTowerWallet, useBittensorWallet } from '@/hooks/use-treasury';
+import { useTreasuryOverview, useTransactions, useTowerWallet, useBittensorWallet, useMetaplexAgent } from '@/hooks/use-treasury';
 import { CyberCard } from '@/components/CyberCard';
 import { format, subDays, startOfDay } from 'date-fns';
-import { ArrowRightLeft, ArrowDownToLine, ArrowUpFromLine, Lock, Unlock, ExternalLink, Wallet, Zap, Droplets, Brain } from 'lucide-react';
+import { ArrowRightLeft, ArrowDownToLine, ArrowUpFromLine, Lock, Unlock, ExternalLink, Wallet, Zap, Droplets, Brain, Bot } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -15,6 +15,7 @@ export default function Treasury() {
   const { data: transactions, isLoading: txLoading } = useTransactions(100);
   const { data: towerWallet, isLoading: walletLoading, error: walletError } = useTowerWallet();
   const { data: bittensorWallet, isLoading: bittensorLoading, error: bittensorError } = useBittensorWallet();
+  const { data: metaplexAgent, isLoading: metaplexLoading } = useMetaplexAgent();
   const queryClient = useQueryClient();
 
   const [airdropStatus, setAirdropStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -328,6 +329,64 @@ export default function Treasury() {
                       AI subnet {bittensorWallet.hasBittensorAi ? 'ONLINE' : 'NOT_CONFIGURED'}
                     </span>
                   </div>
+                </div>
+              </div>
+            ) : null}
+          </CyberCard>
+
+          <CyberCard className="border-secondary/30">
+            <div className="flex items-center gap-2 mb-3">
+              <Bot className="w-4 h-4 text-secondary" />
+              <p className="text-xs font-display tracking-[0.2em] text-secondary uppercase">Tower Onchain Identity</p>
+              <span className="text-[9px] font-display uppercase tracking-wider text-secondary/60 border border-secondary/30 px-1 py-0.5">MPL</span>
+            </div>
+            {metaplexLoading ? (
+              <p className="text-xs text-muted-foreground">Checking Metaplex registry...</p>
+            ) : metaplexAgent ? (
+              <div className="space-y-2">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Network</p>
+                  <div className="flex items-center gap-1.5">
+                    <Zap className="w-3 h-3 text-secondary" />
+                    <span className="text-xs font-display text-secondary uppercase">{metaplexAgent.network}</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Status</p>
+                  <div className="flex items-center gap-1.5">
+                    <div className={`w-1.5 h-1.5 rounded-full ${metaplexAgent.registered ? 'bg-accent' : 'bg-yellow-500'}`} />
+                    <span className={`text-xs font-display uppercase ${metaplexAgent.registered ? 'text-accent' : 'text-yellow-500'}`}>
+                      {metaplexAgent.registered ? 'REGISTERED' : 'NOT REGISTERED'}
+                    </span>
+                  </div>
+                </div>
+                {metaplexAgent.assetPublicKey && (
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Agent Asset ID</p>
+                    <p className="font-mono text-[10px] text-secondary/80 break-all">{metaplexAgent.assetPublicKey}</p>
+                  </div>
+                )}
+                <div className="flex flex-col gap-1.5 pt-1">
+                  {metaplexAgent.explorerUrl && (
+                    <a
+                      href={metaplexAgent.explorerUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[10px] text-secondary hover:text-secondary/80 transition-colors"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      View on Solana Explorer
+                    </a>
+                  )}
+                  <a
+                    href="/api/agent-card"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    View Agent Card (ERC-8004)
+                  </a>
                 </div>
               </div>
             ) : null}
