@@ -13,6 +13,13 @@ import {
 } from "@workspace/api-zod";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { eq, asc, desc, sql } from "drizzle-orm";
+import type { ChatCompletionMessageParam, ChatCompletionToolMessageParam, ChatCompletionAssistantMessageParam } from "openai/resources/chat/completions";
+
+type PendingToolCall = {
+  id: string;
+  name: string;
+  arguments: string;
+};
 
 const router: IRouter = Router();
 
@@ -208,174 +215,212 @@ ${txSummary}`;
   }
 }
 
-async function executeToolCall(name: string, args: Record<string, unknown>): Promise<string> {
+function validateToolArgs(name: string, args: Record<string, unknown>): { valid: true } | { valid: false; error: string } {
   switch (name) {
-    case "list_bounties": {
-      let rows = await db
-        .select()
-        .from(bountiesTable)
-        .orderBy(desc(bountiesTable.createdAt));
-
-      if (args.status) {
-        rows = rows.filter(r => r.status === args.status);
+    case "find_residents_by_skill":
+      if (!args.skill || typeof args.skill !== "string") {
+        return { valid: false, error: "Missing required parameter: skill (string)" };
       }
-      if (args.category) {
-        rows = rows.filter(r => r.category === (args.category as string));
+      return { valid: true };
+    case "get_residents_by_floor":
+      if (args.floor === undefined || typeof args.floor !== "number") {
+        return { valid: false, error: "Missing required parameter: floor (number)" };
       }
-      if (args.floor) {
-        const floorStr = String(args.floor);
-        rows = rows.filter(r =>
-          r.title.toLowerCase().includes(`floor ${floorStr}`) ||
-          r.description.toLowerCase().includes(`floor ${floorStr}`)
-        );
+      return { valid: true };
+    case "report_floor_issue":
+      if (args.floor === undefined || typeof args.floor !== "number") {
+        return { valid: false, error: "Missing required parameter: floor (number)" };
       }
-
-      if (rows.length === 0) {
-        return JSON.stringify({ results: [], message: "No bounties found matching those filters." });
+      if (!args.location || typeof args.location !== "string") {
+        return { valid: false, error: "Missing required parameter: location (string)" };
       }
-
-      return JSON.stringify({
-        count: rows.length,
-        bounties: rows.slice(0, 10).map(b => ({
-          id: b.id,
-          title: b.title,
-          description: b.description.slice(0, 150),
-          reward: `${Number(b.rewardAmount)} ${b.rewardToken}`,
-          status: b.status,
-          category: b.category,
-          creator: b.creatorWallet,
-          claimer: b.claimerWallet,
-        })),
-      });
-    }
-
-    case "find_residents_by_skill": {
-      const skill = (args.skill as string).toLowerCase();
-      const allResidents = await db.select().from(residentsTable);
-      const matched = allResidents.filter(r => {
-        const skills = r.skills as string[];
-        return skills.some(s => s.toLowerCase().includes(skill));
-      });
-
-      if (matched.length === 0) {
-        return JSON.stringify({ results: [], message: `No residents found with skill matching "${args.skill}".` });
+      if (!args.description || typeof args.description !== "string") {
+        return { valid: false, error: "Missing required parameter: description (string)" };
       }
-
-      return JSON.stringify({
-        count: matched.length,
-        residents: matched.map(r => ({
-          id: r.id,
-          name: r.name,
-          floor: r.floor,
-          status: r.status,
-          skills: r.skills,
-          bio: r.bio?.slice(0, 100),
-        })),
-      });
-    }
-
-    case "get_residents_by_floor": {
-      const floor = Number(args.floor);
-      const allResidents = await db.select().from(residentsTable);
-      const onFloor = allResidents.filter(r => r.floor === floor);
-
-      if (onFloor.length === 0) {
-        return JSON.stringify({ results: [], message: `No residents found on floor ${floor}.` });
-      }
-
-      return JSON.stringify({
-        floor,
-        count: onFloor.length,
-        residents: onFloor.map(r => ({
-          id: r.id,
-          name: r.name,
-          status: r.status,
-          skills: r.skills,
-          bountiesCompleted: r.bountiesCompleted,
-        })),
-      });
-    }
-
-    case "get_treasury_status": {
-      const [escrowResult] = await db
-        .select({
-          total: sql<string>`COALESCE(SUM(CASE WHEN type = 'escrow_lock' THEN amount::numeric ELSE 0 END) - SUM(CASE WHEN type IN ('payout', 'refund') THEN amount::numeric ELSE 0 END), 0)`,
-        })
-        .from(transactionsTable);
-
-      const [depositResult] = await db
-        .select({
-          total: sql<string>`COALESCE(SUM(CASE WHEN type = 'deposit' THEN amount::numeric ELSE 0 END), 0)`,
-        })
-        .from(transactionsTable);
-
-      const [paidResult] = await db
-        .select({
-          total: sql<string>`COALESCE(SUM(CASE WHEN type = 'payout' THEN amount::numeric ELSE 0 END), 0)`,
-        })
-        .from(transactionsTable);
-
-      const [activeBounties] = await db
-        .select({ count: sql<number>`COUNT(*)::int` })
-        .from(bountiesTable)
-        .where(sql`status IN ('open', 'claimed')`);
-
-      return JSON.stringify({
-        totalBalance: Number(depositResult?.total ?? 0) - Number(paidResult?.total ?? 0),
-        pendingEscrow: Number(escrowResult?.total ?? 0),
-        totalPaidOut: Number(paidResult?.total ?? 0),
-        activeBounties: activeBounties?.count ?? 0,
-        currency: "USDC",
-      });
-    }
-
-    case "report_floor_issue": {
-      const floor = Number(args.floor);
-      const location = args.location as string;
-      const description = args.description as string;
-      const urgency = (args.urgency as string) || "medium";
-
-      const rewardMap: Record<string, number> = {
-        low: 10,
-        medium: 25,
-        high: 50,
-        critical: 100,
-      };
-      const reward = rewardMap[urgency] || 25;
-
-      const [bounty] = await db
-        .insert(bountiesTable)
-        .values({
-          title: `[Floor ${floor}] ${location} — ${description.slice(0, 60)}`,
-          description: `Maintenance issue reported via Tower AI.\n\nFloor: ${floor}\nLocation: ${location}\nDescription: ${description}\nUrgency: ${urgency}`,
-          rewardAmount: String(reward),
-          rewardToken: "USDC",
-          category: "MAINTENANCE",
-          creatorWallet: "tower-ai",
-        })
-        .returning();
-
-      await db.insert(transactionsTable).values({
-        type: "escrow_lock",
-        amount: String(reward),
-        token: "USDC",
-        fromWallet: "tower-ai",
-        bountyId: bounty.id,
-        description: `Escrow for Tower-reported issue: ${bounty.title}`,
-      });
-
-      return JSON.stringify({
-        success: true,
-        bountyId: bounty.id,
-        title: bounty.title,
-        reward: `${reward} USDC`,
-        urgency,
-        message: `Maintenance bounty #${bounty.id} created for floor ${floor}.`,
-      });
-    }
-
+      return { valid: true };
     default:
-      return JSON.stringify({ error: `Unknown tool: ${name}` });
+      return { valid: true };
+  }
+}
+
+async function executeToolCall(name: string, args: Record<string, unknown>): Promise<string> {
+  const validation = validateToolArgs(name, args);
+  if (!validation.valid) {
+    return JSON.stringify({ error: validation.error });
+  }
+
+  try {
+    switch (name) {
+      case "list_bounties": {
+        let rows = await db
+          .select()
+          .from(bountiesTable)
+          .orderBy(desc(bountiesTable.createdAt));
+
+        if (args.status && typeof args.status === "string") {
+          rows = rows.filter(r => r.status === args.status);
+        }
+        if (args.category && typeof args.category === "string") {
+          rows = rows.filter(r => r.category === args.category);
+        }
+        if (args.floor && typeof args.floor === "number") {
+          const floorStr = String(args.floor);
+          rows = rows.filter(r =>
+            r.title.toLowerCase().includes(`floor ${floorStr}`) ||
+            r.description.toLowerCase().includes(`floor ${floorStr}`)
+          );
+        }
+
+        if (rows.length === 0) {
+          return JSON.stringify({ results: [], message: "No bounties found matching those filters." });
+        }
+
+        return JSON.stringify({
+          count: rows.length,
+          bounties: rows.slice(0, 10).map(b => ({
+            id: b.id,
+            title: b.title,
+            description: b.description.slice(0, 150),
+            reward: `${Number(b.rewardAmount)} ${b.rewardToken}`,
+            status: b.status,
+            category: b.category,
+            creator: b.creatorWallet,
+            claimer: b.claimerWallet,
+          })),
+        });
+      }
+
+      case "find_residents_by_skill": {
+        const skill = (args.skill as string).toLowerCase();
+        const allResidents = await db.select().from(residentsTable);
+        const matched = allResidents.filter(r => {
+          const skills = r.skills as string[];
+          return skills.some(s => s.toLowerCase().includes(skill));
+        });
+
+        if (matched.length === 0) {
+          return JSON.stringify({ results: [], message: `No residents found with skill matching "${args.skill}".` });
+        }
+
+        return JSON.stringify({
+          count: matched.length,
+          residents: matched.map(r => ({
+            id: r.id,
+            name: r.name,
+            floor: r.floor,
+            status: r.status,
+            skills: r.skills,
+            bio: r.bio?.slice(0, 100),
+          })),
+        });
+      }
+
+      case "get_residents_by_floor": {
+        const floor = args.floor as number;
+        const allResidents = await db.select().from(residentsTable);
+        const onFloor = allResidents.filter(r => r.floor === floor);
+
+        if (onFloor.length === 0) {
+          return JSON.stringify({ results: [], message: `No residents found on floor ${floor}.` });
+        }
+
+        return JSON.stringify({
+          floor,
+          count: onFloor.length,
+          residents: onFloor.map(r => ({
+            id: r.id,
+            name: r.name,
+            status: r.status,
+            skills: r.skills,
+            bountiesCompleted: r.bountiesCompleted,
+          })),
+        });
+      }
+
+      case "get_treasury_status": {
+        const [escrowResult] = await db
+          .select({
+            total: sql<string>`COALESCE(SUM(CASE WHEN type = 'escrow_lock' THEN amount::numeric ELSE 0 END) - SUM(CASE WHEN type IN ('payout', 'refund') THEN amount::numeric ELSE 0 END), 0)`,
+          })
+          .from(transactionsTable);
+
+        const [depositResult] = await db
+          .select({
+            total: sql<string>`COALESCE(SUM(CASE WHEN type = 'deposit' THEN amount::numeric ELSE 0 END), 0)`,
+          })
+          .from(transactionsTable);
+
+        const [paidResult] = await db
+          .select({
+            total: sql<string>`COALESCE(SUM(CASE WHEN type = 'payout' THEN amount::numeric ELSE 0 END), 0)`,
+          })
+          .from(transactionsTable);
+
+        const [activeBounties] = await db
+          .select({ count: sql<number>`COUNT(*)::int` })
+          .from(bountiesTable)
+          .where(sql`status IN ('open', 'claimed')`);
+
+        return JSON.stringify({
+          totalBalance: Number(depositResult?.total ?? 0) - Number(paidResult?.total ?? 0),
+          pendingEscrow: Number(escrowResult?.total ?? 0),
+          totalPaidOut: Number(paidResult?.total ?? 0),
+          activeBounties: activeBounties?.count ?? 0,
+          currency: "USDC",
+        });
+      }
+
+      case "report_floor_issue": {
+        const floor = args.floor as number;
+        const location = args.location as string;
+        const description = args.description as string;
+        const urgency = (typeof args.urgency === "string" ? args.urgency : "medium");
+
+        const rewardMap: Record<string, number> = {
+          low: 10,
+          medium: 25,
+          high: 50,
+          critical: 100,
+        };
+        const reward = rewardMap[urgency] || 25;
+
+        const [bounty] = await db
+          .insert(bountiesTable)
+          .values({
+            title: `[Floor ${floor}] ${location} — ${description.slice(0, 60)}`,
+            description: `Maintenance issue reported via Tower AI.\n\nFloor: ${floor}\nLocation: ${location}\nDescription: ${description}\nUrgency: ${urgency}`,
+            rewardAmount: String(reward),
+            rewardToken: "USDC",
+            category: "MAINTENANCE",
+            creatorWallet: "tower-ai",
+          })
+          .returning();
+
+        await db.insert(transactionsTable).values({
+          type: "escrow_lock",
+          amount: String(reward),
+          token: "USDC",
+          fromWallet: "tower-ai",
+          bountyId: bounty.id,
+          description: `Escrow for Tower-reported issue: ${bounty.title}`,
+        });
+
+        return JSON.stringify({
+          success: true,
+          bountyId: bounty.id,
+          title: bounty.title,
+          reward: `${reward} USDC`,
+          urgency,
+          message: `Maintenance bounty #${bounty.id} created for floor ${floor}.`,
+        });
+      }
+
+      default:
+        return JSON.stringify({ error: `Unknown tool: ${name}` });
+    }
+  } catch (err) {
+    console.error(`Tool execution error (${name}):`, err);
+    return JSON.stringify({ error: `Tool execution failed: ${name}` });
   }
 }
 
@@ -483,9 +528,9 @@ router.post("/openai/conversations/:id/messages", async (req, res) => {
   const liveContext = await getLiveContext();
   const systemPrompt = BASE_SYSTEM_PROMPT.replace("{{LIVE_CONTEXT}}", liveContext);
 
-  const chatMessages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+  const chatMessages: ChatCompletionMessageParam[] = [
     { role: "system", content: systemPrompt },
-    ...history.map((m) => ({
+    ...history.map((m): ChatCompletionMessageParam => ({
       role: m.role as "user" | "assistant",
       content: m.content,
     })),
@@ -498,7 +543,7 @@ router.post("/openai/conversations/:id/messages", async (req, res) => {
   let fullResponse = "";
 
   try {
-    let currentMessages: any[] = chatMessages;
+    let currentMessages: ChatCompletionMessageParam[] = chatMessages;
     let maxToolRounds = 5;
 
     while (maxToolRounds > 0) {
@@ -512,7 +557,7 @@ router.post("/openai/conversations/:id/messages", async (req, res) => {
         stream: true,
       });
 
-      let pendingToolCalls: Record<string, { name: string; arguments: string }> = {};
+      const pendingToolCalls: Record<string, PendingToolCall> = {};
       let hasToolCalls = false;
       let contentBuffer = "";
 
@@ -531,7 +576,7 @@ router.post("/openai/conversations/:id/messages", async (req, res) => {
           for (const tc of choice.delta.tool_calls) {
             const idx = String(tc.index);
             if (!pendingToolCalls[idx]) {
-              pendingToolCalls[idx] = { name: "", arguments: "" };
+              pendingToolCalls[idx] = { id: "", name: "", arguments: "" };
             }
             if (tc.function?.name) {
               pendingToolCalls[idx].name = tc.function.name;
@@ -540,7 +585,7 @@ router.post("/openai/conversations/:id/messages", async (req, res) => {
               pendingToolCalls[idx].arguments += tc.function.arguments;
             }
             if (tc.id) {
-              (pendingToolCalls[idx] as any).id = tc.id;
+              pendingToolCalls[idx].id = tc.id;
             }
           }
         }
@@ -556,12 +601,12 @@ router.post("/openai/conversations/:id/messages", async (req, res) => {
 
       const toolCallEntries = Object.values(pendingToolCalls);
 
-      const assistantMsg: any = {
+      const assistantMsg: ChatCompletionAssistantMessageParam = {
         role: "assistant",
         content: contentBuffer || null,
-        tool_calls: toolCallEntries.map((tc: any) => ({
+        tool_calls: toolCallEntries.map((tc) => ({
           id: tc.id,
-          type: "function",
+          type: "function" as const,
           function: { name: tc.name, arguments: tc.arguments },
         })),
       };
@@ -575,15 +620,25 @@ router.post("/openai/conversations/:id/messages", async (req, res) => {
         let args: Record<string, unknown> = {};
         try {
           args = JSON.parse(tc.arguments);
-        } catch {}
+        } catch (parseErr) {
+          console.error(`Failed to parse tool arguments for ${tc.name}:`, parseErr);
+          const toolErrorMsg: ChatCompletionToolMessageParam = {
+            role: "tool",
+            tool_call_id: tc.id,
+            content: JSON.stringify({ error: "Failed to parse tool arguments" }),
+          };
+          currentMessages.push(toolErrorMsg);
+          continue;
+        }
 
         const result = await executeToolCall(tc.name, args);
 
-        currentMessages.push({
+        const toolResultMsg: ChatCompletionToolMessageParam = {
           role: "tool",
-          tool_call_id: (tc as any).id,
+          tool_call_id: tc.id,
           content: result,
-        });
+        };
+        currentMessages.push(toolResultMsg);
       }
     }
 
