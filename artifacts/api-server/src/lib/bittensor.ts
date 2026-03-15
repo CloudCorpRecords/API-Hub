@@ -5,11 +5,6 @@ export const BITTENSOR_NETWORK = process.env.BITTENSOR_NETWORK ?? "finney";
 
 const TAOSTATS_API = "https://api.taostats.io/api";
 
-const BITTENSOR_RPC_URLS: Record<string, string> = {
-  finney: "https://entrypoint-finney.opentensor.ai:443",
-  test: "https://test.finney.opentensor.ai:443",
-};
-
 let _keyring: Keyring | null = null;
 
 async function getKeyring(): Promise<Keyring> {
@@ -69,32 +64,6 @@ export async function getTaoBalance(ss58Address: string): Promise<{
   } catch (_e) {
   }
 
-  try {
-    const rpcUrl = BITTENSOR_RPC_URLS[BITTENSOR_NETWORK] ?? BITTENSOR_RPC_URLS.finney;
-    const body = JSON.stringify({
-      id: 1,
-      jsonrpc: "2.0",
-      method: "state_getStorage",
-      params: [],
-    });
-    const res = await fetch(rpcUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-      signal: AbortSignal.timeout(8000),
-    });
-    if (res.ok) {
-      return {
-        balance: 0,
-        freeBalance: 0,
-        stakedBalance: 0,
-        address: ss58Address,
-        network: BITTENSOR_NETWORK,
-      };
-    }
-  } catch (_e) {
-  }
-
   return {
     balance: 0,
     freeBalance: 0,
@@ -104,21 +73,39 @@ export async function getTaoBalance(ss58Address: string): Promise<{
   };
 }
 
+export function getBittensorAiConfig(): { baseUrl: string; apiKey: string } | null {
+  const baseUrl = process.env.BITTENSOR_AI_BASE_URL;
+  const apiKey = process.env.BITTENSOR_AI_KEY;
+  if (!baseUrl || !apiKey) return null;
+  return { baseUrl: baseUrl.replace(/\/$/, ""), apiKey };
+}
+
 export async function queryBittensorSubnet(prompt: string): Promise<string> {
-  const apiKey = process.env.CORCEL_API_KEY;
-  if (!apiKey) {
-    return "Bittensor subnet AI is not configured (no CORCEL_API_KEY). The query cannot be routed to the decentralized network at this time.";
+  const config = getBittensorAiConfig();
+
+  if (!config) {
+    return [
+      "Bittensor subnet AI is not configured.",
+      "To enable it, set these two environment variables:",
+      "  BITTENSOR_AI_BASE_URL — OpenAI-compatible base URL of a Bittensor gateway",
+      "  BITTENSOR_AI_KEY     — API key for that gateway",
+      "",
+      "Working gateways (all free-tier or trial available):",
+      "  • nineteen.ai  →  https://api.nineteen.ai/v1",
+      "  • targon       →  https://targon.sybil.com/api/v1",
+      "  • chutes.ai    →  https://llm.chutes.ai/v1",
+    ].join("\n");
   }
 
   try {
-    const res = await fetch("https://api.corcel.io/v1/chat/completions", {
+    const res = await fetch(`${config.baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${config.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3",
+        model: "llama-3.1-8b-instruct",
         stream: false,
         messages: [
           {
@@ -142,6 +129,6 @@ export async function queryBittensorSubnet(prompt: string): Promise<string> {
     const content = data?.choices?.[0]?.message?.content;
     return content ?? "Bittensor subnet returned an empty response.";
   } catch (e: any) {
-    return `Failed to reach Bittensor subnet: ${e?.message ?? "network error"}`;
+    return `Failed to reach Bittensor subnet at ${config.baseUrl}: ${e?.message ?? "network error"}`;
   }
 }

@@ -136,7 +136,7 @@ Each request includes a live context snapshot (open bounty count, treasury balan
 - **Route**: `artifacts/api-server/src/routes/bittensor.ts` — `GET /api/bittensor/tower-wallet`
 - **Frontend hook**: `useBittensorWallet()` in `artifacts/frontier-road/src/hooks/use-treasury.ts` — polls every 60s
 - **Treasury page panel**: shows TAO balance (free + staked), address, Taostats Explorer link, testnet faucet link, and AI subnet online/offline indicator
-- **Bittensor AI**: Corcel API (`https://api.corcel.io/v1/chat/completions`) — OpenAI-compatible gateway to Bittensor subnets; activated by setting `CORCEL_API_KEY` env var
+- **Bittensor AI**: provider-agnostic OpenAI-compatible gateway; set `BITTENSOR_AI_BASE_URL` + `BITTENSOR_AI_KEY` to activate. Active options: nineteen.ai (`https://api.nineteen.ai/v1`), Targon (`https://targon.sybil.com/api/v1`), chutes.ai (`https://llm.chutes.ai/v1`)
 - **Transfer cap**: 0.5 TAO max per transaction (safety guard)
 - **TAO payouts are recorded**: saved to `transactions` table with `type="payout"` and `token="TAO"`
 
@@ -178,4 +178,5 @@ Each request includes a live context snapshot (open bounty count, treasury balan
 - `TOWER_BITTENSOR_MNEMONIC` — Tower AI's Bittensor wallet mnemonic (12-word BIP39 phrase, used to derive sr25519 keypair)
 - `TOWER_BITTENSOR_SS58` — Tower AI's Bittensor wallet SS58 address (`5Fxx8eF9eay7EzJF463of5UfR8eWoaVaVuFjxFs6JDc1yTtV`)
 - `BITTENSOR_NETWORK` — Bittensor network name (`finney` for mainnet, `test` for testnet, defaults to `finney`)
-- `CORCEL_API_KEY` — (optional) Corcel API key to enable Bittensor subnet AI inference; without it Tower notes the subnet is offline
+- `BITTENSOR_AI_BASE_URL` — (optional) OpenAI-compatible base URL of any Bittensor AI gateway (e.g. `https://api.nineteen.ai/v1` for nineteen.ai subnet 19)
+- `BITTENSOR_AI_KEY` — (optional) API key for the above gateway; without both vars Tower reports the subnet is offline

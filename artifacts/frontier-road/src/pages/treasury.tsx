@@ -323,9 +323,9 @@ export default function Treasury() {
                     Get testnet TAO
                   </a>
                   <div className="flex items-center gap-1.5 pt-1">
-                    <div className={`w-1.5 h-1.5 rounded-full ${bittensorWallet.hasCorcelKey ? 'bg-accent' : 'bg-destructive'}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${bittensorWallet.hasBittensorAi ? 'bg-accent' : 'bg-yellow-500'}`} />
                     <span className="text-[9px] text-muted-foreground">
-                      AI subnet {bittensorWallet.hasCorcelKey ? 'ONLINE' : 'NO_KEY'}
+                      AI subnet {bittensorWallet.hasBittensorAi ? 'ONLINE' : 'NOT_CONFIGURED'}
                     </span>
                   </div>
                 </div>

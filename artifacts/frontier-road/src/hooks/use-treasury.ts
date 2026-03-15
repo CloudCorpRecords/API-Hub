@@ -40,7 +40,7 @@ interface BittensorWallet {
   stakedTao: number;
   totalTao: number;
   explorerUrl: string;
-  hasCorcelKey: boolean;
+  hasBittensorAi: boolean;
 }
 
 export function useBittensorWallet() {

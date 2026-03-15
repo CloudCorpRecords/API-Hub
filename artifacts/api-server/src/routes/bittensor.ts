@@ -3,6 +3,7 @@ import {
   getTaoBalance,
   getTowerSS58,
   explorerAddressUrl,
+  getBittensorAiConfig,
   BITTENSOR_NETWORK,
 } from "../lib/bittensor";
 
@@ -25,7 +26,7 @@ router.get("/bittensor/tower-wallet", async (_req, res) => {
       stakedTao: balanceInfo.stakedBalance,
       totalTao: balanceInfo.balance,
       explorerUrl: explorerAddressUrl(address),
-      hasCorcelKey: Boolean(process.env.CORCEL_API_KEY),
+      hasBittensorAi: Boolean(getBittensorAiConfig()),
     });
   } catch (err) {
     console.error("Failed to fetch Bittensor wallet info:", err);

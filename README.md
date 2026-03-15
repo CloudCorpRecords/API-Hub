@@ -81,11 +81,23 @@ Tower AI can consult the Bittensor decentralized AI network directly from a conv
 - *"Query Bittensor subnet about co-living community conflict resolution"*
 - *"What does the decentralized AI say about this problem?"*
 
-If a `CORCEL_API_KEY` is set, queries are routed to Bittensor subnet 18 (Corcel gateway, OpenAI-compatible). Without the key, Tower gracefully explains the subnet is unreachable and the Treasury page shows an "AI subnet NO_KEY" status indicator.
+The Bittensor AI backend is provider-agnostic — set two env vars to connect to any OpenAI-compatible Bittensor gateway:
+- `BITTENSOR_AI_BASE_URL` — base URL of the gateway (e.g. `https://api.nineteen.ai/v1`)
+- `BITTENSOR_AI_KEY` — your API key for that gateway
+
+Active gateways you can use today:
+
+| Gateway | Subnet | URL |
+|---------|--------|-----|
+| [nineteen.ai](https://nineteen.ai) | 19 — LLM inference | `https://api.nineteen.ai/v1` |
+| [Targon](https://targon.sybil.com) | 4 — Macrocosmos | `https://targon.sybil.com/api/v1` |
+| [chutes.ai](https://chutes.ai) | Multi | `https://llm.chutes.ai/v1` |
+
+Without the vars set, Tower gracefully explains the subnet is unreachable and the Treasury page shows a yellow "NOT_CONFIGURED" status indicator.
 
 **Tower's TAO wallet:** `5Fxx8eF9eay7EzJF463of5UfR8eWoaVaVuFjxFs6JDc1yTtV` ([view on Taostats](https://taostats.io/coldkey/5Fxx8eF9eay7EzJF463of5UfR8eWoaVaVuFjxFs6JDc1yTtV))
 
-**REST endpoint:** `GET /api/bittensor/tower-wallet` — returns the TAO wallet address, live TAO balance (free + staked), network, Taostats Explorer URL, and whether the Corcel AI key is configured. The Treasury page polls this every 60 seconds.
+**REST endpoint:** `GET /api/bittensor/tower-wallet` — returns the TAO wallet address, live TAO balance (free + staked), network, Taostats Explorer URL, and `hasBittensorAi` (true if a gateway is configured). The Treasury page polls this every 60 seconds.
 
 **Wallet library:** `@polkadot/keyring` + `@polkadot/util-crypto` — the same keypair format used by Polkadot/Substrate chains. The wallet is loaded from a mnemonic stored in `TOWER_BITTENSOR_MNEMONIC`.
 
@@ -185,11 +197,12 @@ pnpm --filter @workspace/api-spec run codegen
 | `TOWER_BITTENSOR_MNEMONIC` | Tower AI's Bittensor wallet mnemonic (12-word BIP39) |
 | `TOWER_BITTENSOR_SS58` | Tower AI's Bittensor SS58 address |
 | `BITTENSOR_NETWORK` | Bittensor network (`finney` for mainnet, `test` for testnet) |
-| `CORCEL_API_KEY` | (optional) Corcel API key — enables Bittensor subnet AI inference |
+| `BITTENSOR_AI_BASE_URL` | (optional) Base URL of any OpenAI-compatible Bittensor gateway (e.g. `https://api.nineteen.ai/v1`) |
+| `BITTENSOR_AI_KEY` | (optional) API key for the Bittensor gateway above |
 
 To fund the Tower AI Solana wallet on devnet, visit the Treasury page and click **"Request Devnet SOL"** — or go to [faucet.solana.com](https://faucet.solana.com).
 
-To enable Bittensor subnet AI queries, set `CORCEL_API_KEY` with a key from [corcel.io](https://corcel.io). Without it, Tower gracefully reports that the subnet is offline.
+To enable Bittensor subnet AI queries, set `BITTENSOR_AI_BASE_URL` + `BITTENSOR_AI_KEY` using any active gateway — see the [Bittensor integration](#bittensor-integration) section for options. Without them, Tower gracefully reports that the subnet is offline.
 
 ---
 
