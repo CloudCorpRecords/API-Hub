@@ -10,12 +10,14 @@ import {
   X,
   Cpu,
   LogIn,
-  LogOut
+  LogOut,
+  AlertTriangle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useWallet } from '@/hooks/use-wallet';
 import { useAuth } from '@workspace/replit-auth-web';
 import { CyberButton } from './CyberButton';
+import { ReportIssueModal } from './ReportIssueModal';
 
 const navItems = [
   { href: '/dashboard', label: 'SYS_DASHBOARD', icon: TerminalSquare },
@@ -28,6 +30,7 @@ const navItems = [
 export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const { isConnected, walletAddress, connect, disconnect } = useWallet();
   const { user, isAuthenticated, isLoading, login, logout } = useAuth();
 
@@ -37,6 +40,8 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background flex text-foreground selection:bg-primary/30 selection:text-primary">
+      {showReportModal && <ReportIssueModal onClose={() => setShowReportModal(false)} />}
+
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card/50 backdrop-blur-md relative z-20">
         <Link href="/" className="p-6 border-b border-border flex items-center gap-3 hover:bg-primary/5 transition-colors">
@@ -138,6 +143,15 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowReportModal(true)}
+              className="flex items-center gap-1.5 text-xs text-yellow-500 hover:text-yellow-400 transition-colors font-display tracking-widest uppercase"
+              title="Report a floor issue"
+            >
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">REPORT</span>
+            </button>
+
             {/* Auth controls */}
             {!isLoading && (
               isAuthenticated ? (
