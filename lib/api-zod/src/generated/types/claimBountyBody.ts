@@ -7,5 +7,4 @@
  */
 
 export interface ClaimBountyBody {
-  claimerWallet: string;
 }

@@ -7,6 +7,7 @@ import {
   ListResidentsQueryParams,
 } from "@workspace/api-zod";
 import { eq } from "drizzle-orm";
+import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
 
@@ -32,7 +33,7 @@ router.get("/residents", async (req, res) => {
   );
 });
 
-router.post("/residents", async (req, res) => {
+router.post("/residents", requireAuth, async (req, res) => {
   const parsed = CreateResidentBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -67,7 +68,7 @@ router.get("/residents/:id", async (req, res) => {
   res.json({ ...resident, totalEarned: Number(resident.totalEarned), userId: resident.userId || null });
 });
 
-router.patch("/residents/:id", async (req, res) => {
+router.patch("/residents/:id", requireAuth, async (req, res) => {
   const id = Number(req.params.id);
   const parsed = UpdateResidentBody.safeParse(req.body);
   if (!parsed.success) {
@@ -85,15 +86,12 @@ router.patch("/residents/:id", async (req, res) => {
     return;
   }
 
-  if (existing.userId) {
-    if (!req.isAuthenticated()) {
-      res.status(401).json({ error: "Authentication required to update a linked profile" });
-      return;
-    }
-    if (existing.userId !== req.user.id) {
-      res.status(403).json({ error: "You can only update your own profile" });
-      return;
-    }
+  if (existing.userId && existing.userId !== req.user!.id) {
+    res.status(403).json({
+      error: "Forbidden",
+      message: "You can only update your own resident profile.",
+    });
+    return;
   }
 
   const updateData: Record<string, unknown> = {};

@@ -14,6 +14,8 @@ import {
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { eq, asc, desc, sql } from "drizzle-orm";
 import type { ChatCompletionMessageParam, ChatCompletionToolMessageParam, ChatCompletionAssistantMessageParam } from "openai/resources/chat/completions";
+import { requireAuth } from "../middlewares/requireAuth";
+import { towerAiMessageLimiter } from "../middlewares/rateLimiter";
 
 type PendingToolCall = {
   id: string;
@@ -433,7 +435,7 @@ router.get("/openai/conversations", async (_req, res) => {
   res.json(rows);
 });
 
-router.post("/openai/conversations", async (req, res) => {
+router.post("/openai/conversations", requireAuth, async (req, res) => {
   const parsed = CreateOpenaiConversationBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -496,7 +498,7 @@ router.get("/openai/conversations/:id/messages", async (req, res) => {
   res.json(msgs);
 });
 
-router.post("/openai/conversations/:id/messages", async (req, res) => {
+router.post("/openai/conversations/:id/messages", requireAuth, towerAiMessageLimiter, async (req, res) => {
   const id = Number(req.params.id);
   const parsed = SendOpenaiMessageBody.safeParse(req.body);
   if (!parsed.success) {

@@ -7,7 +7,9 @@ import {
   CompleteBountyBody,
   ListBountiesQueryParams,
 } from "@workspace/api-zod";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
+import { requireAuth } from "../middlewares/requireAuth";
+import { bountyCreateLimiter, bountyClaimLimiter } from "../middlewares/rateLimiter";
 
 const router: IRouter = Router();
 
@@ -30,7 +32,7 @@ router.get("/bounties", async (req, res) => {
   );
 });
 
-router.post("/bounties", async (req, res) => {
+router.post("/bounties", requireAuth, bountyCreateLimiter, async (req, res) => {
   const parsed = CreateBountyBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -45,7 +47,7 @@ router.post("/bounties", async (req, res) => {
       rewardAmount: String(parsed.data.rewardAmount),
       rewardToken: parsed.data.rewardToken ?? "USDC",
       category: parsed.data.category,
-      creatorWallet: parsed.data.creatorWallet,
+      creatorWallet: req.user!.id,
       escrowTxSignature: parsed.data.escrowTxSignature,
     })
     .returning();
@@ -54,7 +56,7 @@ router.post("/bounties", async (req, res) => {
     type: "escrow_lock",
     amount: String(parsed.data.rewardAmount),
     token: parsed.data.rewardToken ?? "USDC",
-    fromWallet: parsed.data.creatorWallet,
+    fromWallet: req.user!.id,
     bountyId: bounty.id,
     txSignature: parsed.data.escrowTxSignature,
     description: `Escrow locked for bounty: ${parsed.data.title}`,
@@ -73,13 +75,8 @@ router.get("/bounties/:id", async (req, res) => {
   res.json({ ...bounty, rewardAmount: Number(bounty.rewardAmount) });
 });
 
-router.post("/bounties/:id/claim", async (req, res) => {
+router.post("/bounties/:id/claim", requireAuth, bountyClaimLimiter, async (req, res) => {
   const id = Number(req.params.id);
-  const parsed = ClaimBountyBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
-    return;
-  }
 
   const [bounty] = await db.select().from(bountiesTable).where(eq(bountiesTable.id, id));
   if (!bounty) {
@@ -95,17 +92,22 @@ router.post("/bounties/:id/claim", async (req, res) => {
     .update(bountiesTable)
     .set({
       status: "claimed",
-      claimerWallet: parsed.data.claimerWallet,
+      claimerWallet: req.user!.id,
       updatedAt: new Date(),
     })
-    .where(eq(bountiesTable.id, id))
+    .where(and(eq(bountiesTable.id, id), eq(bountiesTable.status, "open")))
     .returning();
+
+  if (!updated) {
+    res.status(409).json({ error: "Bounty is no longer available for claiming" });
+    return;
+  }
 
   await db.insert(transactionsTable).values({
     type: "bounty_claim",
     amount: bounty.rewardAmount,
     token: bounty.rewardToken,
-    fromWallet: parsed.data.claimerWallet,
+    fromWallet: req.user!.id,
     bountyId: bounty.id,
     description: `Bounty claimed: ${bounty.title}`,
   });
@@ -113,7 +115,7 @@ router.post("/bounties/:id/claim", async (req, res) => {
   res.json({ ...updated, rewardAmount: Number(updated.rewardAmount) });
 });
 
-router.post("/bounties/:id/complete", async (req, res) => {
+router.post("/bounties/:id/complete", requireAuth, async (req, res) => {
   const id = Number(req.params.id);
   const parsed = CompleteBountyBody.safeParse(req.body);
   if (!parsed.success) {
@@ -130,6 +132,13 @@ router.post("/bounties/:id/complete", async (req, res) => {
     res.status(409).json({ error: "Bounty must be claimed before completing" });
     return;
   }
+  if (bounty.claimerWallet !== req.user!.id) {
+    res.status(403).json({
+      error: "Forbidden",
+      message: "Only the claimer can complete this bounty.",
+    });
+    return;
+  }
 
   const [updated] = await db
     .update(bountiesTable)
@@ -139,8 +148,13 @@ router.post("/bounties/:id/complete", async (req, res) => {
       completionTxSignature: parsed.data.completionTxSignature,
       updatedAt: new Date(),
     })
-    .where(eq(bountiesTable.id, id))
+    .where(and(eq(bountiesTable.id, id), eq(bountiesTable.status, "claimed")))
     .returning();
+
+  if (!updated) {
+    res.status(409).json({ error: "Bounty state changed concurrently" });
+    return;
+  }
 
   await db.insert(transactionsTable).values({
     type: "payout",
@@ -156,7 +170,7 @@ router.post("/bounties/:id/complete", async (req, res) => {
   res.json({ ...updated, rewardAmount: Number(updated.rewardAmount) });
 });
 
-router.post("/bounties/:id/cancel", async (req, res) => {
+router.post("/bounties/:id/cancel", requireAuth, async (req, res) => {
   const id = Number(req.params.id);
   const [bounty] = await db.select().from(bountiesTable).where(eq(bountiesTable.id, id));
   if (!bounty) {
@@ -167,12 +181,27 @@ router.post("/bounties/:id/cancel", async (req, res) => {
     res.status(409).json({ error: `Cannot cancel a bounty that is already ${bounty.status}` });
     return;
   }
+  if (bounty.creatorWallet !== req.user!.id) {
+    res.status(403).json({
+      error: "Forbidden",
+      message: "Only the creator can cancel this bounty.",
+    });
+    return;
+  }
 
   const [updated] = await db
     .update(bountiesTable)
     .set({ status: "cancelled", updatedAt: new Date() })
-    .where(eq(bountiesTable.id, id))
+    .where(and(
+      eq(bountiesTable.id, id),
+      eq(bountiesTable.creatorWallet, req.user!.id),
+    ))
     .returning();
+
+  if (!updated) {
+    res.status(409).json({ error: "Bounty state changed concurrently" });
+    return;
+  }
 
   await db.insert(transactionsTable).values({
     type: "refund",

@@ -135,7 +135,6 @@ export const CreateBountyBody = zod.object({
   rewardAmount: zod.number(),
   rewardToken: zod.string().default(createBountyBodyRewardTokenDefault),
   category: zod.string(),
-  creatorWallet: zod.string(),
   escrowTxSignature: zod.string().optional(),
 });
 
@@ -170,9 +169,7 @@ export const ClaimBountyParams = zod.object({
   id: zod.coerce.number(),
 });
 
-export const ClaimBountyBody = zod.object({
-  claimerWallet: zod.string(),
-});
+export const ClaimBountyBody = zod.object({});
 
 export const ClaimBountyResponse = zod.object({
   id: zod.number(),

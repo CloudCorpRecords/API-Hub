@@ -26,6 +26,17 @@ export function useChatStream(conversationId?: number) {
         body: JSON.stringify({ content })
       });
 
+      if (res.status === 401) {
+        const returnTo = encodeURIComponent(window.location.pathname);
+        window.location.href = `/api/login?returnTo=${returnTo}`;
+        return;
+      }
+      if (res.status === 403) {
+        throw new Error('You don\'t have permission to perform this action.');
+      }
+      if (res.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again later.');
+      }
       if (!res.ok) throw new Error('Failed to send message');
       
       const reader = res.body?.getReader();

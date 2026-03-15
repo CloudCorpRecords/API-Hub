@@ -128,7 +128,6 @@ export default function Bounties() {
           description: createForm.description,
           rewardAmount: Number(createForm.amount),
           category: createForm.category || 'GENERAL',
-          creatorWallet: walletAddress,
           rewardToken: 'USDC'
         }
       });
@@ -146,7 +145,7 @@ export default function Bounties() {
       return;
     }
     try {
-      await claimMutation.mutateAsync({ id, data: { claimerWallet: walletAddress } });
+      await claimMutation.mutateAsync({ id, data: {} });
       toast({ title: "CLAIMED", description: "Bounty assigned to you." });
     } catch (err) {
       toast({ title: "ERROR", description: "Failed to claim.", variant: "destructive" });

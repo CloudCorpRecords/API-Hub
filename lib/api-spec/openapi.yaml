@@ -784,8 +784,6 @@ components:
           default: USDC
         category:
           type: string
-        creatorWallet:
-          type: string
         escrowTxSignature:
           type: string
       required:
@@ -793,15 +791,10 @@ components:
         - description
         - rewardAmount
         - category
-        - creatorWallet
 
     ClaimBountyBody:
       type: object
-      properties:
-        claimerWallet:
-          type: string
-      required:
-        - claimerWallet
+      properties: {}
 
     CompleteBountyBody:
       type: object

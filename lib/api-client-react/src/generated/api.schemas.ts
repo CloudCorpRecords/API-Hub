@@ -87,12 +87,10 @@ export interface CreateBountyBody {
   rewardAmount: number;
   rewardToken?: string;
   category: string;
-  creatorWallet: string;
   escrowTxSignature?: string;
 }
 
 export interface ClaimBountyBody {
-  claimerWallet: string;
 }
 
 export interface CompleteBountyBody {

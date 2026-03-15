@@ -30,7 +30,6 @@ export function ReportIssueModal({ onClose }: { onClose: () => void }) {
           description: desc,
           rewardAmount: urgency === 'Urgent' ? 50 : urgency === 'Medium' ? 25 : 10,
           category: 'MAINTENANCE',
-          creatorWallet: walletAddress,
           rewardToken: 'USDC',
         }
       });

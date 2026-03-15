@@ -108,7 +108,7 @@ Tower AI has access to 5 tools that query/mutate the live database:
 
 Each request includes a live context snapshot (open bounty count, treasury balance, resident count, recent transactions) injected into the system prompt. Tool call results stream back via SSE with inline status indicators ("Querying bounty board...", "Looking up residents...", etc.).
 
-## Auth, Profile & Wallet
+## Auth, Profile, Security & Wallet
 
 - Auth uses Replit OIDC via `@workspace/replit-auth-web` → `useAuth()` hook
 - On first login, a resident profile is auto-created using the user's name and avatar
@@ -118,6 +118,13 @@ Each request includes a live context snapshot (open bounty count, treasury balan
 - When authenticated, the wallet identity is automatically set to `user_{id}` — no separate "Connect Wallet" step needed
 - The CONNECT_WALLET button in the header is hidden when the user is authenticated
 - Unauthenticated users can still manually connect a demo wallet
+- **Route protection**: All mutation endpoints (POST/PATCH) require authentication via `requireAuth` middleware (returns 401 JSON)
+- **Server-enforced identity**: `creatorWallet` and `claimerWallet` are set server-side from `req.user.id` — client-supplied values are ignored
+- **Ownership checks**: Cancel requires `creatorWallet === req.user.id`; Complete requires `claimerWallet === req.user.id` (403 otherwise)
+- **Atomic state transitions**: Bounty claim/complete/cancel use `WHERE status = ...` guards to prevent race conditions
+- **Rate limiting**: express-rate-limit per-user: 5 bounty creates/hr, 10 claims/hr, 30 AI messages/10min (429 JSON on exceed)
+- **Security headers**: helmet.js on all responses (CSP disabled for compatibility)
+- **Frontend error handling**: Global MutationCache catches 401→redirect to login, 403→permission denied toast, 429→rate limit toast
 
 ## Development
 
