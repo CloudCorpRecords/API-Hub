@@ -20,15 +20,17 @@ export default function Chat() {
     }
   }, [conversations, convsLoading, activeId]);
 
-  useEffect(() => {
-    if (!convsLoading && conversations.length === 0 && !activeId && !autoCreating) {
-      setAutoCreating(true);
-      createConversation('New Session').then(conv => {
-        setActiveId(conv.id);
-        setTimeout(() => inputRef.current?.focus(), 100);
-      }).catch(() => {}).finally(() => setAutoCreating(false));
+  const handleStartSession = async () => {
+    setAutoCreating(true);
+    try {
+      const conv = await createConversation('New Session');
+      setActiveId(conv.id);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    } catch {
+    } finally {
+      setAutoCreating(false);
     }
-  }, [convsLoading, conversations.length, activeId, autoCreating]);
+  };
 
   useEffect(() => {
     if (activeId) {
@@ -113,9 +115,13 @@ export default function Chat() {
         {/* Message Thread */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 cyber-scrollbar relative z-10">
           {messages.length === 0 && !activeId && (
-            <div className="h-full flex flex-col items-center justify-center text-muted-foreground/50">
-              <Terminal className="w-12 h-12 mb-4 animate-pulse" />
-              <p className="font-display uppercase tracking-widest text-sm">Initializing Session...</p>
+            <div className="h-full flex flex-col items-center justify-center">
+              <Terminal className="w-16 h-16 mb-4 text-primary/30" />
+              <p className="font-display uppercase tracking-widest text-lg text-foreground mb-2">Tower AI Ready</p>
+              <p className="font-sans text-sm text-muted-foreground mb-6">Start a session to talk with the Frontier Road concierge</p>
+              <CyberButton onClick={handleStartSession} isLoading={autoCreating}>
+                START_SESSION
+              </CyberButton>
             </div>
           )}
           {messages.length === 0 && activeId && (

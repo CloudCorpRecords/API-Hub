@@ -156,41 +156,34 @@ export default function Dashboard() {
             const statusColor = fs.urgent ? 'border-red-500/50 bg-red-500/5' : fs.issues > 0 ? 'border-yellow-500/50 bg-yellow-500/5' : 'border-accent/30 bg-accent/5';
             const dotColor = fs.urgent ? 'bg-red-500' : fs.issues > 0 ? 'bg-yellow-500' : 'bg-accent';
             return (
-              <CyberCard key={fs.floor} className={`${statusColor} p-4`}>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-display tracking-widest text-sm text-foreground uppercase">Floor {fs.floor}</span>
+              <Link key={fs.floor} href={fs.issues > 0 ? `/bounties?floor=${fs.floor}&category=MAINTENANCE` : `/residents?floor=${fs.floor}`}>
+                <CyberCard className={`${statusColor} p-4 cursor-pointer hover:scale-[1.02] transition-transform`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-muted-foreground" />
+                      <span className="font-display tracking-widest text-sm text-foreground uppercase">Floor {fs.floor}</span>
+                    </div>
+                    <span className={`w-2.5 h-2.5 rounded-full ${dotColor} ${fs.urgent ? 'animate-pulse' : ''}`} />
                   </div>
-                  <span className={`w-2.5 h-2.5 rounded-full ${dotColor} ${fs.urgent ? 'animate-pulse' : ''}`} />
-                </div>
-                <div className="flex items-center justify-between text-xs font-sans text-muted-foreground mb-2">
-                  <span>{fs.online} online / {fs.residents} residents</span>
-                </div>
-                {fs.issues > 0 ? (
-                  <div className="flex items-center gap-1.5 text-xs font-sans">
-                    <AlertCircle className="w-3.5 h-3.5 text-yellow-500" />
-                    <span className="text-yellow-500">{fs.issues} open issue{fs.issues > 1 ? 's' : ''}</span>
+                  <div className="flex items-center justify-between text-xs font-sans text-muted-foreground mb-2">
+                    <span>{fs.online} online / {fs.residents} residents</span>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 text-xs font-sans">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
-                    <span className="text-accent">All clear</span>
+                  {fs.issues > 0 ? (
+                    <div className="flex items-center gap-1.5 text-xs font-sans">
+                      <AlertCircle className="w-3.5 h-3.5 text-yellow-500" />
+                      <span className="text-yellow-500">{fs.issues} open issue{fs.issues > 1 ? 's' : ''}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 text-xs font-sans">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
+                      <span className="text-accent">All clear</span>
+                    </div>
+                  )}
+                  <div className="mt-3 flex gap-2 text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Click to view floor details &rarr;
                   </div>
-                )}
-                <div className="mt-3 flex gap-2">
-                  <Link href={`/bounties?floor=${fs.floor}&category=MAINTENANCE`}>
-                    <button className="text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary border border-border hover:border-primary px-2 py-1 transition-all">
-                      Issues
-                    </button>
-                  </Link>
-                  <Link href={`/residents?floor=${fs.floor}`}>
-                    <button className="text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary border border-border hover:border-primary px-2 py-1 transition-all">
-                      Residents
-                    </button>
-                  </Link>
-                </div>
-              </CyberCard>
+                </CyberCard>
+              </Link>
             );
           })}
         </div>
