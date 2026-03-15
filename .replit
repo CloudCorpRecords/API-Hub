@@ -31,3 +31,6 @@ timeoutMs = 20000
 TOWER_SOLANA_PRIVATE_KEY = "xspow4Q5SEkpnzHOmWqBQz1AAHrvyHbk7w/1rKonwKiYblQmyqt9ZH4hEHuwuY+02lCZakk17E8Y57DtCKZQnw=="
 TOWER_SOLANA_PUBKEY = "BG2YdWeTMYFHNxkUBtTemrSuqHpwL5MqG27qF85jtHVp"
 SOLANA_NETWORK = "devnet"
+TOWER_BITTENSOR_SS58 = "5Fxx8eF9eay7EzJF463of5UfR8eWoaVaVuFjxFs6JDc1yTtV"
+TOWER_BITTENSOR_MNEMONIC = "foil field soup lawn simple insane ticket maple foster friend leopard ribbon"
+BITTENSOR_NETWORK = "finney"

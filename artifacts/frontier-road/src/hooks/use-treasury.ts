@@ -32,3 +32,26 @@ export function useTowerWallet() {
     staleTime: 15_000,
   });
 }
+
+interface BittensorWallet {
+  address: string;
+  network: string;
+  balanceTao: number;
+  stakedTao: number;
+  totalTao: number;
+  explorerUrl: string;
+  hasCorcelKey: boolean;
+}
+
+export function useBittensorWallet() {
+  return useQuery<BittensorWallet>({
+    queryKey: ["bittensor-wallet"],
+    queryFn: async () => {
+      const res = await fetch("/api/bittensor/tower-wallet");
+      if (!res.ok) throw new Error("Failed to fetch Bittensor wallet");
+      return res.json();
+    },
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+}

@@ -1,8 +1,8 @@
 import { useMemo, useState, useCallback } from 'react';
-import { useTreasuryOverview, useTransactions, useTowerWallet } from '@/hooks/use-treasury';
+import { useTreasuryOverview, useTransactions, useTowerWallet, useBittensorWallet } from '@/hooks/use-treasury';
 import { CyberCard } from '@/components/CyberCard';
 import { format, subDays, startOfDay } from 'date-fns';
-import { ArrowRightLeft, ArrowDownToLine, ArrowUpFromLine, Lock, Unlock, ExternalLink, Wallet, Zap, Droplets } from 'lucide-react';
+import { ArrowRightLeft, ArrowDownToLine, ArrowUpFromLine, Lock, Unlock, ExternalLink, Wallet, Zap, Droplets, Brain } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -14,6 +14,7 @@ export default function Treasury() {
   const { data: overview, isLoading: overviewLoading } = useTreasuryOverview();
   const { data: transactions, isLoading: txLoading } = useTransactions(100);
   const { data: towerWallet, isLoading: walletLoading, error: walletError } = useTowerWallet();
+  const { data: bittensorWallet, isLoading: bittensorLoading, error: bittensorError } = useBittensorWallet();
   const queryClient = useQueryClient();
 
   const [airdropStatus, setAirdropStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -200,6 +201,7 @@ export default function Treasury() {
             <div className="flex items-center gap-2 mb-3">
               <Wallet className="w-4 h-4 text-accent" />
               <p className="text-xs font-display tracking-[0.2em] text-accent uppercase">Tower AI Wallet</p>
+              <span className="text-[9px] font-display uppercase tracking-wider text-accent/60 border border-accent/30 px-1 py-0.5">SOL</span>
             </div>
             {walletLoading ? (
               <p className="text-xs text-muted-foreground">Connecting to Solana...</p>
@@ -262,6 +264,70 @@ export default function Treasury() {
                       )}
                     </div>
                   )}
+                </div>
+              </div>
+            ) : null}
+          </CyberCard>
+
+          <CyberCard className="border-primary/30">
+            <div className="flex items-center gap-2 mb-3">
+              <Brain className="w-4 h-4 text-primary" />
+              <p className="text-xs font-display tracking-[0.2em] text-primary uppercase">Tower AI Wallet</p>
+              <span className="text-[9px] font-display uppercase tracking-wider text-primary/60 border border-primary/30 px-1 py-0.5">TAO</span>
+            </div>
+            {bittensorLoading ? (
+              <p className="text-xs text-muted-foreground">Connecting to Bittensor...</p>
+            ) : bittensorError ? (
+              <p className="text-xs text-destructive">Bittensor wallet offline</p>
+            ) : bittensorWallet ? (
+              <div className="space-y-2">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Network</p>
+                  <div className="flex items-center gap-1.5">
+                    <Zap className="w-3 h-3 text-primary" />
+                    <span className="text-xs font-display text-primary uppercase">{bittensorWallet.network}</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Balance</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {bittensorWallet.balanceTao.toFixed(4)} <span className="text-sm text-muted-foreground">TAO</span>
+                  </p>
+                  {bittensorWallet.stakedTao > 0 && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      {bittensorWallet.stakedTao.toFixed(4)} TAO staked
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Address</p>
+                  <p className="font-mono text-[10px] text-primary/80 break-all">{bittensorWallet.address}</p>
+                </div>
+                <div className="flex flex-col gap-1.5 pt-1">
+                  <a
+                    href={bittensorWallet.explorerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] text-primary hover:text-primary/80 transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    View on Taostats Explorer
+                  </a>
+                  <a
+                    href="https://bittensor.com/faucet"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Droplets className="w-3 h-3" />
+                    Get testnet TAO
+                  </a>
+                  <div className="flex items-center gap-1.5 pt-1">
+                    <div className={`w-1.5 h-1.5 rounded-full ${bittensorWallet.hasCorcelKey ? 'bg-accent' : 'bg-destructive'}`} />
+                    <span className="text-[9px] text-muted-foreground">
+                      AI subnet {bittensorWallet.hasCorcelKey ? 'ONLINE' : 'NO_KEY'}
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : null}

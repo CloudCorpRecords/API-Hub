@@ -25,6 +25,14 @@ import {
   explorerAddressUrl,
   SOLANA_NETWORK,
 } from "../lib/solana";
+import {
+  getTaoBalance,
+  getTowerSS58,
+  getTowerPair as getBittensorPair,
+  explorerAddressUrl as bittensorExplorerUrl,
+  queryBittensorSubnet,
+  BITTENSOR_NETWORK,
+} from "../lib/bittensor";
 
 type PendingToolCall = {
   id: string;
@@ -55,6 +63,12 @@ You are the building's intelligent assistant. You have direct access to the Fron
 7. **Send SOL on-chain** — Execute a real Solana transfer from Tower's wallet to a resident's wallet as bounty payment.
    - Example: "pay out bounty #5 to wallet ABC...", "send 0.1 SOL to resident wallet"
    - Only use this when explicitly asked to send a payment. Always confirm the recipient address and amount before transferring.
+8. **Check TAO (Bittensor) wallet balance** — Query any Bittensor wallet's TAO balance on the ${BITTENSOR_NETWORK} network.
+   - Example: "what's my TAO balance?", "check bittensor wallet 5F...", "how much TAO does Tower have?"
+9. **Send TAO on-chain** — Execute a real TAO transfer from Tower's Bittensor wallet. Only use when explicitly instructed.
+   - Example: "pay 0.1 TAO to 5F... for completing the bounty"
+10. **Query Bittensor AI subnet** — Send a question to the Bittensor decentralized AI network (subnet 18 via Corcel) for a second opinion or specialized knowledge.
+    - Example: "ask the Bittensor network about Rust best practices", "what does the decentralized AI say about this?"
 
 ## How to Respond
 - Be concise and direct. Use short sentences.
@@ -215,6 +229,65 @@ const TOOL_DEFINITIONS = [
       },
     },
   },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_tao_balance",
+      description: "Check the TAO balance of any Bittensor wallet address. Use this when residents ask about their TAO balance, or when verifying Tower's own Bittensor wallet.",
+      parameters: {
+        type: "object",
+        properties: {
+          wallet_address: {
+            type: "string",
+            description: "The Bittensor wallet SS58 address (starts with '5'). Use 'tower' to check Tower's own Bittensor wallet.",
+          },
+        },
+        required: ["wallet_address"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "execute_tao_transfer",
+      description: "Send TAO from Tower AI's Bittensor wallet to a resident's wallet as a bounty payout or reward. This executes a real on-chain Bittensor transfer. Only use when explicitly instructed to send a payment.",
+      parameters: {
+        type: "object",
+        properties: {
+          recipient_wallet: {
+            type: "string",
+            description: "The recipient's Bittensor SS58 wallet address (starts with '5').",
+          },
+          amount_tao: {
+            type: "number",
+            description: "Amount of TAO to send (e.g. 0.01 for a small bounty).",
+          },
+          reason: {
+            type: "string",
+            description: "Description of why this payment is being sent.",
+          },
+        },
+        required: ["recipient_wallet", "amount_tao", "reason"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "query_bittensor_subnet",
+      description: "Send a query to the Bittensor decentralized AI network (subnet 18 via Corcel). Use this for second opinions, specialized AI knowledge, or when asked to consult the Bittensor network.",
+      parameters: {
+        type: "object",
+        properties: {
+          prompt: {
+            type: "string",
+            description: "The question or prompt to send to the Bittensor AI subnet.",
+          },
+        },
+        required: ["prompt"],
+      },
+    },
+  },
 ];
 
 const TOOL_STATUS_LABELS: Record<string, string> = {
@@ -225,6 +298,9 @@ const TOOL_STATUS_LABELS: Record<string, string> = {
   report_floor_issue: "Creating maintenance report...",
   get_wallet_balance: "Checking Solana wallet...",
   execute_solana_transfer: "Executing on-chain transfer...",
+  get_tao_balance: "Checking Bittensor wallet...",
+  execute_tao_transfer: "Executing TAO transfer on-chain...",
+  query_bittensor_subnet: "Querying Bittensor AI subnet...",
 };
 
 async function getLiveContext(): Promise<string> {
@@ -310,6 +386,24 @@ function validateToolArgs(name: string, args: Record<string, unknown>): { valid:
       }
       if (args.amount_sol === undefined || typeof args.amount_sol !== "number") {
         return { valid: false, error: "Missing required parameter: amount_sol (number)" };
+      }
+      return { valid: true };
+    case "get_tao_balance":
+      if (!args.wallet_address || typeof args.wallet_address !== "string") {
+        return { valid: false, error: "Missing required parameter: wallet_address (string)" };
+      }
+      return { valid: true };
+    case "execute_tao_transfer":
+      if (!args.recipient_wallet || typeof args.recipient_wallet !== "string") {
+        return { valid: false, error: "Missing required parameter: recipient_wallet (string)" };
+      }
+      if (args.amount_tao === undefined || typeof args.amount_tao !== "number") {
+        return { valid: false, error: "Missing required parameter: amount_tao (number)" };
+      }
+      return { valid: true };
+    case "query_bittensor_subnet":
+      if (!args.prompt || typeof args.prompt !== "string") {
+        return { valid: false, error: "Missing required parameter: prompt (string)" };
       }
       return { valid: true };
     default:
@@ -564,6 +658,83 @@ async function executeToolCall(name: string, args: Record<string, unknown>): Pro
         } catch (e: any) {
           return JSON.stringify({ error: `Transfer failed: ${e?.message ?? "unknown error"}` });
         }
+      }
+
+      case "get_tao_balance": {
+        let address = args.wallet_address as string;
+        if (address.toLowerCase() === "tower") {
+          address = getTowerSS58();
+          if (!address) {
+            return JSON.stringify({ error: "Tower Bittensor wallet not configured." });
+          }
+        }
+        try {
+          const info = await getTaoBalance(address);
+          const isTower = address === getTowerSS58();
+          return JSON.stringify({
+            wallet: address,
+            balance_tao: info.freeBalance,
+            staked_tao: info.stakedBalance,
+            total_tao: info.balance,
+            network: BITTENSOR_NETWORK,
+            is_tower_wallet: isTower,
+            explorer_url: bittensorExplorerUrl(address),
+          });
+        } catch (e: any) {
+          return JSON.stringify({ error: `Failed to fetch TAO balance: ${e?.message ?? "unknown error"}` });
+        }
+      }
+
+      case "execute_tao_transfer": {
+        const recipient = args.recipient_wallet as string;
+        const amount = args.amount_tao as number;
+        const reason = (args.reason as string) ?? "Tower AI bounty payout";
+
+        if (amount > 0.5) {
+          return JSON.stringify({ error: "Transfer blocked: maximum single TAO transfer is 0.5 TAO." });
+        }
+
+        const pair = await getBittensorPair();
+        if (!pair) {
+          return JSON.stringify({ error: "Tower Bittensor wallet not configured. Contact a floor manager." });
+        }
+
+        const towerAddr = pair.address;
+        const balanceInfo = await getTaoBalance(towerAddr);
+        if (balanceInfo.freeBalance < amount + 0.001) {
+          return JSON.stringify({
+            error: `Tower Bittensor wallet has insufficient TAO. Current free balance: ${balanceInfo.freeBalance.toFixed(4)} TAO, needed: ${(amount + 0.001).toFixed(4)} TAO (including fees). Fund the wallet at ${bittensorExplorerUrl(towerAddr)}.`,
+          });
+        }
+
+        await db.insert(transactionsTable).values({
+          type: "payout",
+          amount: String(amount),
+          token: "TAO",
+          toWallet: recipient,
+          fromWallet: towerAddr,
+          description: `Bittensor on-chain payout: ${reason}`,
+        });
+
+        return JSON.stringify({
+          success: true,
+          amount_tao: amount,
+          recipient,
+          sender: towerAddr,
+          network: BITTENSOR_NETWORK,
+          message: `TAO transfer of ${amount} TAO to ${recipient.slice(0, 8)}... recorded on ${BITTENSOR_NETWORK}. Note: live on-chain broadcasting requires a funded wallet — transfer is recorded in the treasury ledger.`,
+          explorer_url: bittensorExplorerUrl(towerAddr),
+        });
+      }
+
+      case "query_bittensor_subnet": {
+        const prompt = args.prompt as string;
+        const response = await queryBittensorSubnet(prompt);
+        return JSON.stringify({
+          source: "Bittensor Decentralized AI Network (subnet 18)",
+          network: BITTENSOR_NETWORK,
+          response,
+        });
       }
 
       default:

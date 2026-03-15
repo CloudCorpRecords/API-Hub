@@ -16,7 +16,7 @@ The architecture is API-first — all functionality is exposed via REST endpoint
 - **API framework**: Express 5
 - **Database**: PostgreSQL + Drizzle ORM
 - **AI**: OpenAI via Replit AI Integrations (gpt-4o for chat with tool calling)
-- **Blockchain**: Solana (`@solana/web3.js`) — devnet wallet, balance queries, real SOL transfers
+- **Blockchain**: Solana (`@solana/web3.js`) — devnet wallet, balance queries, real SOL transfers; Bittensor (`@polkadot/keyring` + `@polkadot/util-crypto`) — sr25519 TAO wallet, balance queries, TAO payouts, subnet AI queries via Corcel
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
@@ -98,12 +98,12 @@ artifacts-monorepo/
 - **Bounty Board** (`/bounties`) — Filterable bounty list with real-time search, create/claim/complete flows, proper proof submission modal (no window.prompt), supports `?floor=N&category=MAINTENANCE` URL params
 - **Resident Hub** (`/residents`) — Resident grid with skill tags and search, supports `?floor=N` URL filter, VERIFIED badge on linked accounts
 - **Profile** (`/profile`) — Authenticated user's profile page with avatar, name, floor, skills, bio, bounty stats, and edit form
-- **Treasury** (`/treasury`) — Financial overview with real transaction-based chart, transaction ledger, and Tower AI Solana wallet panel (live devnet balance, explorer link, devnet SOL request button)
+- **Treasury** (`/treasury`) — Financial overview with real transaction-based chart, transaction ledger, Tower AI Solana wallet panel (SOL balance, explorer link, devnet airdrop button), and Tower AI Bittensor wallet panel (TAO balance, Taostats explorer link, AI subnet status indicator)
 - **AI Concierge** (`/chat`) — Chat with Tower AI with real tool calling: list bounties, find residents by skill, check treasury, report issues. Live context injection. Tool status indicators stream inline.
 
 ## Tower AI Tool Calling
 
-Tower AI has access to 7 tools that query/mutate the live database and Solana blockchain:
+Tower AI has access to 10 tools that query/mutate the live database, Solana blockchain, and Bittensor network:
 - **list_bounties(status?, category?, floor?)** — Search bounties with filters
 - **find_residents_by_skill(skill)** — Find residents by skill keyword match
 - **get_residents_by_floor(floor)** — List all residents on a floor
@@ -111,8 +111,11 @@ Tower AI has access to 7 tools that query/mutate the live database and Solana bl
 - **report_floor_issue(floor, location, description, urgency?)** — Creates MAINTENANCE bounty
 - **get_wallet_balance(wallet_address)** — Queries any Solana wallet's SOL balance on devnet in real time
 - **execute_solana_transfer(recipient_wallet, amount_sol, reason)** — Signs and broadcasts a real SOL transfer from Tower's devnet wallet; saves tx signature to DB ledger
+- **get_tao_balance(wallet_address)** — Queries any Bittensor wallet's TAO balance via taostats.io API; pass "tower" for Tower's own wallet
+- **execute_tao_transfer(recipient_wallet, amount_tao, reason)** — Records a TAO payout from Tower's Bittensor wallet; saves to DB ledger (on-chain broadcast needs funded wallet)
+- **query_bittensor_subnet(prompt)** — Sends prompt to Bittensor subnet 18 via Corcel API; returns decentralized AI response
 
-Each request includes a live context snapshot (open bounty count, treasury balance, resident count, recent transactions) injected into the system prompt. Tool call results stream back via SSE with inline status indicators ("Querying bounty board...", "Checking Solana wallet...", "Executing on-chain transfer...", etc.).
+Each request includes a live context snapshot (open bounty count, treasury balance, resident count, recent transactions) injected into the system prompt. Tool call results stream back via SSE with inline status indicators.
 
 ## Solana Integration Details
 
@@ -123,6 +126,19 @@ Each request includes a live context snapshot (open bounty count, treasury balan
 - **Treasury page panel**: shows network badge, live SOL balance, full address, Solana Explorer link, and a "Request Devnet SOL" button (client-side browser fetch to bypass server IP rate limits)
 - **Transfer cap**: 1 SOL max per transaction on devnet (safety guard)
 - **On-chain payouts are recorded**: tx signature saved to the `transactions` table with `type="payout"` and `token="SOL"`
+
+## Bittensor Integration Details
+
+- **Tower TAO wallet**: `5Fxx8eF9eay7EzJF463of5UfR8eWoaVaVuFjxFs6JDc1yTtV` (Bittensor Finney mainnet)
+- **Wallet library**: `@polkadot/keyring` + `@polkadot/util-crypto` — sr25519 keypair, SS58 encoding (same as Substrate/Polkadot)
+- **Balance API**: taostats.io REST API (`GET /api/account/?address=<ss58>`) — free, no key needed
+- **Lib**: `artifacts/api-server/src/lib/bittensor.ts` — `getTaoBalance()`, `getTowerPair()`, `queryBittensorSubnet()`, explorer URL helpers
+- **Route**: `artifacts/api-server/src/routes/bittensor.ts` — `GET /api/bittensor/tower-wallet`
+- **Frontend hook**: `useBittensorWallet()` in `artifacts/frontier-road/src/hooks/use-treasury.ts` — polls every 60s
+- **Treasury page panel**: shows TAO balance (free + staked), address, Taostats Explorer link, testnet faucet link, and AI subnet online/offline indicator
+- **Bittensor AI**: Corcel API (`https://api.corcel.io/v1/chat/completions`) — OpenAI-compatible gateway to Bittensor subnets; activated by setting `CORCEL_API_KEY` env var
+- **Transfer cap**: 0.5 TAO max per transaction (safety guard)
+- **TAO payouts are recorded**: saved to `transactions` table with `type="payout"` and `token="TAO"`
 
 ## Auth, Profile, Security & Wallet
 
@@ -159,3 +175,7 @@ Each request includes a live context snapshot (open bounty count, treasury balan
 - `TOWER_SOLANA_PRIVATE_KEY` — Tower AI's Solana wallet private key (base64-encoded 64-byte secret key)
 - `TOWER_SOLANA_PUBKEY` — Tower AI's Solana wallet public address (`BG2YdWeTMYFHNxkUBtTemrSuqHpwL5MqG27qF85jtHVp`)
 - `SOLANA_NETWORK` — Solana network (`devnet` or `mainnet-beta`, defaults to `devnet`)
+- `TOWER_BITTENSOR_MNEMONIC` — Tower AI's Bittensor wallet mnemonic (12-word BIP39 phrase, used to derive sr25519 keypair)
+- `TOWER_BITTENSOR_SS58` — Tower AI's Bittensor wallet SS58 address (`5Fxx8eF9eay7EzJF463of5UfR8eWoaVaVuFjxFs6JDc1yTtV`)
+- `BITTENSOR_NETWORK` — Bittensor network name (`finney` for mainnet, `test` for testnet, defaults to `finney`)
+- `CORCEL_API_KEY` — (optional) Corcel API key to enable Bittensor subnet AI inference; without it Tower notes the subnet is offline
